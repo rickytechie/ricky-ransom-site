@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 
 const missionStatement =
-  "I want to build a website for my digital marketing and technology consulting business, my new main business, for Ricky Ransom, LLC. Specializing in web, digital and creative arts, I want to help creative entrepreneurs capture, learn, understand and apply the power and potential of modern arts and technologies, blending the two to help them succeed in their goals and endeavors.";
+  "I deliver end-to-end consulting designed to future-proof your business by intersecting art and intelligence. My primary focus areas include high-impact AI Consulting & Training, full-scale Media Services, and dynamic Keynote Speaking. Additionally, I architect growth through data-driven Digital Marketing, custom Web Design & Development, and robust Software Consulting. Whether optimizing workflows, crafting high-end digital media assets, or building scalable software applications, I provide the precise strategic oversight and technical execution needed to elevate your brand's potential.";
 
 const services = [
   {
@@ -144,7 +144,7 @@ export default function Home() {
                 Where Art Meets Intelligence.
               </h2>
               <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-300">
-                {missionStatement} I specialize in AI Consulting & Training, Media Services, Keynote Speaking, Digital Marketing, Web Design & Development, and Software Consulting.
+                {missionStatement}
               </p>
             </div>
 
