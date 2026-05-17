@@ -83,6 +83,14 @@ const services = [
 
 const portfolioItems = [
   {
+    title: "RickPick",
+    subtitle: "AI-precision market intelligence for stock and crypto portfolio growth.",
+    description:
+      "Elite fintech case study showcasing a live AI trading engine that blends geopolitical, medical, aerospace, and macro intelligence into real-time market picks.",
+    link: "/projects/rickpick",
+    featured: true,
+  },
+  {
     title: "Gym Mingle",
     subtitle: "Web & Mobile Fitness Dating App with Local Business Integration",
     description:
