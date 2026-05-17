@@ -319,7 +319,8 @@ export default function Home() {
             </p>
           </div>
           <div className="rounded-[2rem] border border-white/10 bg-white/5 px-8 py-7 text-sm text-slate-200 shadow-xl shadow-violet-500/10 backdrop-blur-xl">
-            <p className="font-semibold text-white">hello@rickyransom.com</p>
+            <p className="font-semibold text-white">E: rickyransomcompany@gmail.com</p>
+            <p className="mt-3 font-semibold text-white">W: 929.379.7612</p>
             <p className="mt-3 text-slate-400">Ricky Ransom, LLC</p>
           </div>
         </div>
