@@ -1,7 +1,73 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+
+const sampleProfiles = [
+  {
+    id: 1,
+    name: "Jordan, 28",
+    location: "Brooklyn, NY",
+    bio: "Yoga enthusiast, coffee lover, weekend hiker. Looking for someone who's serious about wellness.",
+    matchScore: 94,
+    activities: ["Yoga", "Hiking", "Pilates"],
+    cuisine: "Mediterranean",
+    vibe: "Adventurous",
+    image: "🧘‍♀️",
+  },
+  {
+    id: 2,
+    name: "Alex, 31",
+    location: "Manhattan, NY",
+    bio: "CrossFit fanatic, foodie, dog dad. Let's grab coffee and hit the gym together!",
+    matchScore: 87,
+    activities: ["CrossFit", "Swimming", "Rock Climbing"],
+    cuisine: "Italian",
+    vibe: "Social",
+    image: "💪",
+  },
+  {
+    id: 3,
+    name: "Morgan, 26",
+    location: "Park Slope, NY",
+    bio: "Pilates instructor, plant-based living, and all about authentic connections.",
+    matchScore: 91,
+    activities: ["Pilates", "Yoga", "Cycling"],
+    cuisine: "Vegan",
+    vibe: "Relaxed",
+    image: "🧘‍♂️",
+  },
+];
+
+const itineraryOptions = [
+  {
+    id: 1,
+    title: "Active & Social",
+    stages: [
+      { stage: 1, venue: "Barry's Bootcamp (Brooklyn)", time: "6:00 PM - 7:00 PM" },
+      { stage: 2, venue: "Spa Castle (NYC)", time: "7:30 PM - 8:30 PM" },
+      { stage: 3, venue: "Carbone (Downtown)", time: "9:00 PM - 11:00 PM" },
+    ],
+  },
+  {
+    id: 2,
+    title: "Zen & Mindful",
+    stages: [
+      { stage: 1, venue: "Equinox Yoga (Tribeca)", time: "5:30 PM - 6:30 PM" },
+      { stage: 2, venue: "Sanctuary Spa (SoHo)", time: "7:00 PM - 8:00 PM" },
+      { stage: 3, venue: "Balthazar (SoHo)", time: "8:30 PM - 10:30 PM" },
+    ],
+  },
+  {
+    id: 3,
+    title: "Adventure Mode",
+    stages: [
+      { stage: 1, venue: "Chelsea Piers Rock Climbing", time: "6:00 PM - 7:30 PM" },
+      { stage: 2, venue: "Aire Ancient Baths (NYC)", time: "8:00 PM - 9:00 PM" },
+      { stage: 3, venue: "Gramercy Tavern (Flatiron)", time: "9:30 PM - 11:00 PM" },
+    ],
+  },
+];
 
 const matchAttributes = [
   { category: "Top 5 Fitness Activities", examples: ["CrossFit", "Yoga", "Rock Climbing", "Swimming", "Pilates"] },
@@ -66,6 +132,10 @@ const filteringCapabilities = [
 export default function GymMingleShowcase() {
   const [activeStage, setActiveStage] = useState(1);
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
+  const [selectedItinerary, setSelectedItinerary] = useState<number | null>(null);
+  const [demoMode, setDemoMode] = useState("profiles");
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -164,6 +234,207 @@ export default function GymMingleShowcase() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
+        <div className="mb-12 space-y-4">
+          <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">Try the App</p>
+          <h2 className="text-4xl font-semibold text-white sm:text-5xl">
+            Interactive Live Demo
+          </h2>
+          <p className="max-w-2xl text-slate-400">
+            Experience the Gym Mingle matching interface, swiping mechanics, and itinerary picker firsthand. See how users connect and plan their 3-stage dates.
+          </p>
+        </div>
+
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-violet-500/10">
+          <div className="flex flex-wrap gap-3 mb-8">
+            <button
+              onClick={() => { setDemoMode("profiles"); setCurrentProfileIndex(0); }}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                demoMode === "profiles"
+                  ? "bg-violet-500 text-white"
+                  : "bg-white/10 text-slate-300 hover:bg-white/20"
+              }`}
+            >
+              👤 Matching
+            </button>
+            <button
+              onClick={() => setDemoMode("itinerary")}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+                demoMode === "itinerary"
+                  ? "bg-violet-500 text-white"
+                  : "bg-white/10 text-slate-300 hover:bg-white/20"
+              }`}
+            >
+              📅 Date Itineraries
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {demoMode === "profiles" && (
+              <motion.div
+                key="profiles"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-6"
+              >
+                <div className="relative">
+                  {currentProfileIndex < sampleProfiles.length ? (
+                    <motion.div
+                      key={sampleProfiles[currentProfileIndex].id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="rounded-[2rem] border border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-transparent p-8 shadow-xl"
+                    >
+                      <div className="flex items-start gap-6">
+                        <div className="text-7xl">{sampleProfiles[currentProfileIndex].image}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-3xl font-semibold text-white">
+                              {sampleProfiles[currentProfileIndex].name}
+                            </h3>
+                            <div className="rounded-full bg-cyan-500/20 px-4 py-2 text-sm font-bold text-cyan-300">
+                              {sampleProfiles[currentProfileIndex].matchScore}% Match
+                            </div>
+                          </div>
+                          <p className="mt-1 text-sm text-slate-400">{sampleProfiles[currentProfileIndex].location}</p>
+                          <p className="mt-4 text-slate-300">{sampleProfiles[currentProfileIndex].bio}</p>
+
+                          <div className="mt-6 space-y-4">
+                            <div>
+                              <p className="text-xs uppercase tracking-[0.3em] text-violet-300/80">Activities</p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {sampleProfiles[currentProfileIndex].activities.map((activity) => (
+                                  <div
+                                    key={activity}
+                                    className="rounded-full bg-cyan-500/20 px-3 py-1 text-xs text-cyan-300"
+                                  >
+                                    {activity}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.3em] text-violet-300/80">Cuisine Preference</p>
+                                <p className="mt-2 text-sm text-white">{sampleProfiles[currentProfileIndex].cuisine}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.3em] text-violet-300/80">Date Vibe</p>
+                                <p className="mt-2 text-sm text-white">{sampleProfiles[currentProfileIndex].vibe}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="rounded-[2rem] border border-white/10 bg-white/5 p-12 text-center">
+                      <p className="text-xl font-semibold text-white">No more profiles to show</p>
+                      <p className="mt-2 text-slate-400">You've swiped through all demo profiles!</p>
+                    </div>
+                  )}
+                </div>
+
+                {currentProfileIndex < sampleProfiles.length && (
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => setCurrentProfileIndex((i) => Math.min(i + 1, sampleProfiles.length))}
+                      className="rounded-full border border-slate-400 bg-slate-500/10 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-500/20"
+                    >
+                      ✗ Pass
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLikedProfiles([...likedProfiles, sampleProfiles[currentProfileIndex].id]);
+                        setCurrentProfileIndex((i) => Math.min(i + 1, sampleProfiles.length));
+                      }}
+                      className="rounded-full border border-pink-400 bg-pink-500/20 px-6 py-3 text-sm font-semibold text-pink-300 transition hover:bg-pink-500/30"
+                    >
+                      ♥ Like
+                    </button>
+                  </div>
+                )}
+
+                {likedProfiles.length > 0 && (
+                  <div className="rounded-[1.75rem] border border-green-400/30 bg-green-500/10 p-6">
+                    <p className="text-sm text-green-300">
+                      ✓ You've liked {likedProfiles.length} profile{likedProfiles.length !== 1 ? "s" : ""}. Next: Check your matches and plan dates!
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {demoMode === "itinerary" && (
+              <motion.div
+                key="itinerary"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-6"
+              >
+                <p className="text-slate-400">
+                  Select an itinerary to see how Gym Mingle orchestrates your 3-stage date across local partner venues.
+                </p>
+
+                <div className="grid gap-4 lg:grid-cols-3">
+                  {itineraryOptions.map((itinerary) => (
+                    <button
+                      key={itinerary.id}
+                      onClick={() => setSelectedItinerary(selectedItinerary === itinerary.id ? null : itinerary.id)}
+                      className={`rounded-[2rem] border transition p-6 text-left ${
+                        selectedItinerary === itinerary.id
+                          ? "border-violet-400 bg-violet-500/10 shadow-lg"
+                          : "border-white/10 bg-white/5 hover:border-white/20"
+                      }`}
+                    >
+                      <h3 className="text-lg font-semibold text-white">{itinerary.title}</h3>
+                      <p className="mt-2 text-xs text-slate-400">{itinerary.stages.length} stops • ~4 hours</p>
+                    </button>
+                  ))}
+                </div>
+
+                {selectedItinerary && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-[2rem] border border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-transparent p-8"
+                  >
+                    <h3 className="text-2xl font-semibold text-white">
+                      {itineraryOptions.find((i) => i.id === selectedItinerary)?.title}
+                    </h3>
+
+                    <div className="mt-8 space-y-6">
+                      {itineraryOptions
+                        .find((i) => i.id === selectedItinerary)
+                        ?.stages.map((stage, idx) => (
+                          <div
+                            key={idx}
+                            className="relative flex gap-6 rounded-[1.75rem] border border-white/10 bg-white/5 p-6"
+                          >
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-500/20 text-2xl shrink-0">
+                              {stage.stage === 1 ? "💪" : stage.stage === 2 ? "🧘" : "🍽️"}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs uppercase tracking-[0.3em] text-violet-300/80">Stage {stage.stage}</p>
+                              <h4 className="mt-1 text-lg font-semibold text-white">{stage.venue}</h4>
+                              <p className="mt-2 text-sm text-slate-400">{stage.time}</p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
