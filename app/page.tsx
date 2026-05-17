@@ -83,6 +83,14 @@ const services = [
 
 const portfolioItems = [
   {
+    title: "Gym Mingle",
+    subtitle: "Web & Mobile Fitness Dating App with Local Business Integration",
+    description:
+      "A revolutionary 3-stage date platform blending digital matching with curated physical experiences. Drives local foot traffic through orchestrated fitness, wellness, and dining itineraries. Features 1,000+ preference tags, enterprise-grade safety protocols, and law enforcement integration.",
+    link: "/projects/gym-mingle",
+    featured: true,
+  },
+  {
     title: "Crown & Sole",
     subtitle: "E-commerce logistics and immersive retail storytelling.",
     description:
@@ -292,17 +300,33 @@ export default function Home() {
             <motion.div
               key={project.title}
               whileHover={{ y: -6 }}
-              className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 text-white shadow-2xl shadow-violet-500/5 transition duration-300"
+              className={`group overflow-hidden rounded-[2rem] border transition duration-300 ${
+                (project as any).featured
+                  ? "lg:col-span-2 border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-transparent shadow-2xl shadow-violet-500/20"
+                  : "border-white/10 bg-white/5 shadow-2xl shadow-violet-500/5"
+              } p-8 text-white`}
             >
               <div className="space-y-4">
-                <div className="rounded-3xl border border-white/10 bg-black/50 p-4 text-sm uppercase tracking-[0.35em] text-violet-200">
-                  Project
+                <div className={`rounded-3xl border p-4 text-sm uppercase tracking-[0.35em] ${
+                  (project as any).featured
+                    ? "border-violet-400/40 bg-violet-500/10 text-violet-200"
+                    : "border-white/10 bg-black/50 text-violet-200"
+                }`}>
+                  {(project as any).featured ? "⭐ Featured" : "Project"}
                 </div>
                 <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
                 <p className="text-sm text-slate-400">{project.subtitle}</p>
                 <p className="mt-4 text-sm leading-7 text-slate-300 transition group-hover:text-white">
                   {project.description}
                 </p>
+                {(project as any).link && (
+                  <a
+                    href={(project as any).link}
+                    className="mt-6 inline-flex rounded-full border border-violet-300/40 bg-violet-500/10 px-5 py-2 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 hover:border-violet-300/60"
+                  >
+                    View Case Study →
+                  </a>
+                )}
               </div>
             </motion.div>
           ))}
