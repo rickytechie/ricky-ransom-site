@@ -207,7 +207,7 @@ export default function SkoolToolsPage() {
               View Cart
             </button>
           </div>
-        </header>
+        </div>
 
         <section className="mb-8 grid gap-6 md:grid-cols-3">
           <div className="md:col-span-2">
