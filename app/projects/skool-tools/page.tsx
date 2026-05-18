@@ -34,7 +34,7 @@ const inventory: Item[] = [
   { id: 7, title: "Mechanical Pencil (0.7mm)", brand: "PaperStudio", category: "Pencils", price: 8, sku: "PS-PEN-007" },
   { id: 8, title: "Graphing Calculator (TI-Style)", brand: "Texas Instruments", category: "Calculators", price: 150, sku: "TI-CALC-008" },
   { id: 9, title: "Smart Digital Notebook (Cloud)", brand: "Rocketbook", category: "Digital Paper", price: 60, sku: "RB-DN-009" },
-  { id: 10, title: "Tablet 10" Study Pad", brand: "BrightClass", category: "Tablets", price: 299, sku: "BC-TAB-010" },
+  { id: 10, title: 'Tablet 10" Study Pad', brand: "BrightClass", category: "Tablets", price: 299, sku: "BC-TAB-010" },
   { id: 11, title: "Stylus for Digital Paper", brand: "Rocketbook", category: "Accessories", price: 29, sku: "RB-STY-011" },
   { id: 12, title: "Portable Mini Whiteboard", brand: "PaperStudio", category: "Whiteboards", price: 24, sku: "PS-WB-012" },
   { id: 13, title: "Aesthetic Sticky Notes Pack", brand: "PastelIndie Co.", category: "Stationery", price: 8, sku: "PI-ST-013" },
@@ -62,7 +62,7 @@ const inventory: Item[] = [
   { id: 35, title: "Ergonomic Desk Mat", brand: "StudioNote", category: "Accessories", price: 35, sku: "SN-DM-035" },
   { id: 36, title: "Sticky Flag Tabs (100)", brand: "PaperStudio", category: "Stationery", price: 5, sku: "PS-FL-036" },
   { id: 37, title: "High-Precision Compass", brand: "Five Star", category: "Accessories", price: 12, sku: "FS-CP-037" },
-  { id: 38, title: "Premium Binder (1")", brand: "Mead", category: "Accessories", price: 15, sku: "MD-BND-038" },
+  { id: 38, title: 'Premium Binder (1")', brand: "Mead", category: "Accessories", price: 15, sku: "MD-BND-038" },
   { id: 39, title: "Notebook Skin Stickers", brand: "PastelIndie Co.", category: "Stationery", price: 9, sku: "PI-SK-039" },
   { id: 40, title: "Color-Coded Divider Set", brand: "PaperStudio", category: "Accessories", price: 8, sku: "PS-DV-040" },
   { id: 41, title: "Mini Desk Lamp (USB)", brand: "BrightClass", category: "Accessories", price: 24, sku: "BC-LMP-041" },
@@ -145,7 +145,15 @@ export default function SkoolToolsPage() {
     });
   };
   const changeQty = (id: number, qty: number) => {
-    setCart((c) => ({ ...c, [id]: qty <= 0 ? 0 : qty }));
+    setCart((c) => {
+      const next = { ...c };
+      if (qty <= 0) {
+        delete next[id];
+      } else {
+        next[id] = qty;
+      }
+      return next;
+    });
   };
 
   const addBundle = (id: number) => {
@@ -185,9 +193,10 @@ export default function SkoolToolsPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 py-12">
       <div className="mx-auto max-w-6xl px-6">
-        <header className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-semibold">Skool Tools — E-Commerce Case Study</h1>
+            <a href="/" className="text-sm font-semibold text-slate-700 transition hover:text-slate-900">← Back to home</a>
+            <h1 className="mt-3 text-4xl font-semibold">Skool Tools — E-Commerce Case Study</h1>
             <p className="mt-2 text-slate-600 max-w-xl">A friendly, high-fidelity demo showcasing full-stack e-commerce UX, state management, and conversion flows.</p>
           </div>
           <div className="flex items-center gap-4">

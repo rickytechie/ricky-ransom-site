@@ -115,6 +115,7 @@ const portfolioItems = [
     subtitle: "Media and EdTech tools designed for high-impact learning.",
     description:
       "A creative toolkit for education brands that need polished content workflows and smart digital product design.",
+    link: "/projects/skool-tools",
   },
 ];
 
