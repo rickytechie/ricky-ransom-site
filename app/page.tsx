@@ -83,18 +83,26 @@ const services = [
 
 const portfolioItems = [
   {
-    title: "RickPick",
-    subtitle: "AI-precision market intelligence for stock and crypto portfolio growth.",
+    title: "RickPick Pro",
+    subtitle: "AI-precision trading macro dashboard for enterprise capital allocation.",
     description:
-      "Elite fintech case study showcasing a live AI trading engine that blends geopolitical, medical, aerospace, and macro intelligence into real-time market picks.",
-    link: "/projects/rickpick",
+      "A flagship fintech intelligence experience with multi-market tickers, AI contextual aggregation, sentiment stream, and persona-driven strategy recommendations.",
+    link: "/projects/rickpick-pro",
+    featured: true,
+  },
+  {
+    title: "Super Samurai",
+    subtitle: "2D platformer arcade showcase with custom physics engine and AI-driven combat.",
+    description:
+      "A fully playable game that demonstrates custom canvas rendering, collision physics, and enemy AI in a premium portfolio presentation.",
+    link: "/projects/super-samurai",
     featured: true,
   },
   {
     title: "Gym Mingle",
     subtitle: "Web & Mobile Fitness Dating App with Local Business Integration",
     description:
-      "A revolutionary 3-stage date platform blending digital matching with curated physical experiences. Drives local foot traffic through orchestrated fitness, wellness, and dining itineraries. Features 1,000+ preference tags, enterprise-grade safety protocols, and law enforcement integration.",
+      "A revolutionary 3-stage date platform blending digital matching with curated physical experiences. Drives local foot traffic through orchestrated fitness, wellness, and dining itineraries.",
     link: "/projects/gym-mingle",
     featured: true,
   },
@@ -118,6 +126,8 @@ const portfolioItems = [
     link: "/projects/skool-tools",
   },
 ];
+
+const latestProjects = portfolioItems.filter((project) => project.featured).slice(0, 3);
 
 export default function Home() {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
@@ -293,14 +303,55 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      <section id="featured" className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.35em] text-violet-300/80">Featured Work</p>
+            <h2 className="mt-4 text-4xl font-semibold text-white sm:text-5xl">Latest portfolio highlights</h2>
+          </div>
+          <p className="max-w-xl text-slate-400">
+            The freshest enterprise-level case studies showcasing AI, fintech, product design, and immersive platform engineering.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          {latestProjects.map((project) => (
+            <motion.div
+              key={project.title}
+              whileHover={{ y: -6 }}
+              className="group overflow-hidden rounded-[2rem] border border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-transparent shadow-2xl shadow-violet-500/20 p-8 text-white"
+            >
+              <div className="space-y-4">
+                <div className="rounded-3xl border border-violet-400/40 bg-violet-500/10 p-4 text-sm uppercase tracking-[0.35em] text-violet-200">
+                  ⭐ Featured
+                </div>
+                <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
+                <p className="text-sm text-slate-400">{project.subtitle}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-300 transition group-hover:text-white">
+                  {project.description}
+                </p>
+                {project.link && (
+                  <a
+                    href={project.link}
+                    className="mt-6 inline-flex rounded-full border border-violet-300/40 bg-violet-500/10 px-5 py-2 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 hover:border-violet-300/60"
+                  >
+                    View Case Study →
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       <section id="lab" className="mx-auto max-w-7xl px-6 pb-20 lg:pb-24">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.35em] text-violet-300/80">The Lab</p>
-            <h2 className="mt-4 text-4xl font-semibold text-white sm:text-5xl">Selected creative projects.</h2>
+            <h2 className="mt-4 text-4xl font-semibold text-white sm:text-5xl">All projects in the portfolio</h2>
           </div>
           <p className="max-w-xl text-slate-400">
-            A curated showcase of work designed to demonstrate the fusion of digital experience, community infrastructure, and learning platforms.
+            A complete showcase of premium engagements, technical demos, and boutique digital systems from Ricky Ransom, LLC.
           </p>
         </div>
 
@@ -310,27 +361,27 @@ export default function Home() {
               key={project.title}
               whileHover={{ y: -6 }}
               className={`group overflow-hidden rounded-[2rem] border transition duration-300 ${
-                (project as any).featured
+                project.featured
                   ? "lg:col-span-2 border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-transparent shadow-2xl shadow-violet-500/20"
                   : "border-white/10 bg-white/5 shadow-2xl shadow-violet-500/5"
               } p-8 text-white`}
             >
               <div className="space-y-4">
                 <div className={`rounded-3xl border p-4 text-sm uppercase tracking-[0.35em] ${
-                  (project as any).featured
+                  project.featured
                     ? "border-violet-400/40 bg-violet-500/10 text-violet-200"
                     : "border-white/10 bg-black/50 text-violet-200"
                 }`}>
-                  {(project as any).featured ? "⭐ Featured" : "Project"}
+                  {project.featured ? "⭐ Featured" : "Project"}
                 </div>
                 <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
                 <p className="text-sm text-slate-400">{project.subtitle}</p>
                 <p className="mt-4 text-sm leading-7 text-slate-300 transition group-hover:text-white">
                   {project.description}
                 </p>
-                {(project as any).link && (
+                {project.link && (
                   <a
-                    href={(project as any).link}
+                    href={project.link}
                     className="mt-6 inline-flex rounded-full border border-violet-300/40 bg-violet-500/10 px-5 py-2 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 hover:border-violet-300/60"
                   >
                     View Case Study →
