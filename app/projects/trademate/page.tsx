@@ -14,7 +14,7 @@ import {
   strategiesByPersona,
 } from "./data";
 
-export default function RickPickProPage() {
+export default function TradematePage() {
   const [tickerSymbol, setTickerSymbol] = useState("NVDA");
   const [showDemo, setShowDemo] = useState(true);
 
@@ -41,7 +41,7 @@ export default function RickPickProPage() {
             <a href="/" className="text-xs uppercase tracking-[0.3em] text-slate-400 hover:text-violet-300 transition">
               ← Back
             </a>
-            <h1 className="text-xl font-semibold tracking-tight text-white">RickPick Pro</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-white">Trademate</h1>
           </div>
           <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#dashboard" className="transition hover:text-violet-300">Dashboard</a>
@@ -56,7 +56,7 @@ export default function RickPickProPage() {
           <div className="grid gap-6 xl:grid-cols-[0.9fr_0.8fr]">
             <div className="space-y-4">
               <p className="text-xs uppercase tracking-[0.35em] text-violet-300/80">Enterprise Fintech Intelligence</p>
-              <h2 className="text-4xl font-semibold text-white sm:text-5xl">RickPick Pro — Multi-Market Macro Trading Dashboard</h2>
+              <h2 className="text-4xl font-semibold text-white sm:text-5xl">Trademate — Multi-Market Macro Trading Dashboard</h2>
               <p className="max-w-3xl text-slate-300">
                 A high-fidelity trader console built for Nasdaq, DOW, NYSE, gold, crude, and crypto market flows. It merges AI-driven signal inference with enterprise-grade monitoring and strategy output.
               </p>
@@ -201,7 +201,7 @@ export default function RickPickProPage() {
       <footer className="mx-auto max-w-7xl px-6 py-16 text-slate-300">
         <div className="grid gap-6 lg:grid-cols-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-violet-300/80">RickPick Pro</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-violet-300/80">Trademate</p>
             <h3 className="mt-4 text-2xl font-semibold text-white">Elite Fintech Intelligence</h3>
             <p className="mt-4 max-w-lg text-sm leading-7 text-slate-400">A premium dashboard built for enterprise teams that need fast, actionable macro insights across exchanges, commodities, and crypto.</p>
           </div>

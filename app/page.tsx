@@ -83,11 +83,11 @@ const services = [
 
 const portfolioItems = [
   {
-    title: "RickPick Pro",
+    title: "Trademate",
     subtitle: "AI-precision trading macro dashboard for enterprise capital allocation.",
     description:
       "A flagship fintech intelligence experience with multi-market tickers, AI contextual aggregation, sentiment stream, and persona-driven strategy recommendations.",
-    link: "/projects/rickpick-pro",
+    link: "/projects/trademate",
     featured: true,
   },
   {
