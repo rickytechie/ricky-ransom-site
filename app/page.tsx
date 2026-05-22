@@ -91,6 +91,14 @@ const portfolioItems = [
     featured: true,
   },
   {
+    title: "VibeVenue",
+    subtitle: "Hospitality-tech dashboard for venue atmosphere optimization, revenue capture, and IoT-driven operations.",
+    description:
+      "A premium hospitality case study showcasing AI/IoT integration, real-time analytics, and automated promotional workflows for luxury venues.",
+    link: "/projects/vibevenue",
+    featured: true,
+  },
+  {
     title: "Super Samurai",
     subtitle: "2D platformer arcade showcase with custom physics engine and AI-driven combat.",
     description:
@@ -207,6 +215,34 @@ export default function Home() {
               <li className="rounded-3xl border border-white/10 bg-white/5 p-5">Story-led digital experiences built for technology-first growth.</li>
               <li className="rounded-3xl border border-white/10 bg-white/5 p-5">Premium execution across AI, marketing, web, and media.</li>
             </ul>
+            <div className="rounded-[2rem] border border-violet-400/20 bg-gradient-to-br from-[#07020e] via-[#120b1f] to-[#140313] p-6 shadow-2xl shadow-violet-500/20">
+              <p className="text-xs uppercase tracking-[0.35em] text-violet-200/80">Featured Case Study</p>
+              <div className="mt-5 grid gap-4 rounded-[1.75rem] border border-white/10 bg-black/70 p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.35em] text-slate-400">VibeVenue</p>
+                    <p className="mt-2 text-xl font-semibold text-white">Hospitality-tech intelligence</p>
+                  </div>
+                  <span className="rounded-full bg-violet-500/20 px-3 py-1 text-xs uppercase tracking-[0.35em] text-violet-200">Live Demo</span>
+                </div>
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-violet-500/20 bg-gradient-to-br from-[#09010e] via-[#1b0d31] to-[#100718] p-4">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(147,51,234,0.35),_transparent_40%)]" />
+                  <div className="relative space-y-3 text-sm text-slate-300">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="h-3 w-20 rounded-full bg-violet-400/50" />
+                      <span className="h-3 w-12 rounded-full bg-slate-600/70" />
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-700/90" />
+                    <div className="h-2 rounded-full bg-violet-400/40 w-5/6" />
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div className="rounded-2xl bg-white/5 p-3 text-xs text-slate-300">Ambient & traffic signals</div>
+                      <div className="rounded-2xl bg-white/5 p-3 text-xs text-slate-300">Playlist automation</div>
+                      <div className="rounded-2xl bg-white/5 p-3 text-xs text-slate-300">Dynamic menu triggers</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
