@@ -99,6 +99,22 @@ const portfolioItems = [
     featured: true,
   },
   {
+    title: "Paws & Pixel",
+    subtitle: "Pet-tech e-commerce growth dashboard for AI support and personalized conversion automation.",
+    description:
+      "A case study showing how pet retail revenue scaled from $10k to $300k with AI troubleshooting and checkout personalization.",
+    link: "/portfolio/paws-and-pixel",
+    featured: true,
+  },
+  {
+    title: "ClassyHop",
+    subtitle: "Browser-based DAW simulator blending classical composition with modern production.",
+    description:
+      "A premium audio workstation demo that pairs legendary classical motifs with Hip Hop, Pop, and Jazz loop engines in a dark studio interface.",
+    link: "/portfolio/classyhop",
+    featured: true,
+  },
+  {
     title: "Super Samurai",
     subtitle: "2D platformer arcade showcase with custom physics engine and AI-driven combat.",
     description:
@@ -135,7 +151,7 @@ const portfolioItems = [
   },
 ];
 
-const latestProjects = portfolioItems.filter((project) => project.featured).slice(0, 3);
+const latestProjects = portfolioItems.filter((project) => project.featured).slice(0, 4);
 
 export default function Home() {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
