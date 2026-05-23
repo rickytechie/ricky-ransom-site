@@ -1,132 +1,248 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+
+const bootMessages = [
+  { threshold: 12, message: "Loading AI Consultation Core..." },
+  { threshold: 28, message: "Connecting Creative Asset Frameworks..." },
+  { threshold: 46, message: "Validating narrative systems and brand anchors..." },
+  { threshold: 65, message: "Encrypting commerce flows and launch telemetry..." },
+  { threshold: 84, message: "System Decryption Successful." },
+  { threshold: 100, message: "USER INTERFACE READY." },
+];
+
+const serviceGrid = [
+  { title: "Brand Systems", detail: "Premium identity workflows for digital-first launches." },
+  { title: "AI Strategy", detail: "Generative pipelines, automation design, and insight engines." },
+  { title: "Software Design", detail: "Dark-mode interfaces built for performance and clarity." },
+  { title: "Launch Growth", detail: "Positioning, product motion, and executive storytelling." },
+  { title: "Creative Ops", detail: "Studio-grade production systems for high-performing teams." },
+  { title: "Live Consulting", detail: "Keynote, advisory, and on-demand product leadership." },
+];
+
+const portfolioDeck = [
+  { title: "LexisReach", role: "Legal-tech dashboard & intake system", accent: "AI-driven workflow optimization" },
+  { title: "ClassyHop", role: "Live session lab & brand audio experience", accent: "Ableton-inspired production interface" },
+  { title: "Paws & Pixel", role: "Pet tech growth story", accent: "Conversion-led product storytelling" },
+];
+
+type BootPhase = "boot" | "menu" | "dashboard";
 
 export default function HomePage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const labRef = useRef<HTMLDivElement | null>(null);
-  const [loaded, setLoaded] = useState(0);
-  const [phase, setPhase] = useState<"boot" | "menu" | "home">("boot");
-  const [contactOpen, setContactOpen] = useState(false);
+  const [bootPhase, setBootPhase] = useState<BootPhase>("boot");
+  const [progress, setProgress] = useState(0);
+  const [terminalLog, setTerminalLog] = useState<string[]>(["INITIALIZING SYSTEM ARCHITECTURE..."]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dashboardView, setDashboardView] = useState<"home" | "projects">("home");
+  const projectsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setLoaded((v) => {
-        const n = v + Math.floor(Math.random() * 6) + 2;
-        if (n >= 100) {
-          clearInterval(id);
-          setTimeout(() => setPhase("menu"), 600);
-          return 100;
+    if (bootPhase !== "boot") return;
+
+    let phaseIndex = 0;
+    const timer = window.setInterval(() => {
+      setProgress((previous) => {
+        const next = Math.min(100, previous + Math.floor(Math.random() * 5) + 4);
+        if (phaseIndex < bootMessages.length && next >= bootMessages[phaseIndex].threshold) {
+          setTerminalLog((logs) => [...logs, bootMessages[phaseIndex].message]);
+          phaseIndex += 1;
         }
-        return n;
+
+        if (next === 100) {
+          window.clearInterval(timer);
+          setTimeout(() => {
+            setBootPhase("menu");
+            setTerminalLog((logs) => [...logs, "SYSTEM BOOT SEQUENCE COMPLETE. USER INTERFACE READY."]);
+          }, 700);
+        }
+
+        return next;
       });
-    }, 120);
-    return () => clearInterval(id);
-  }, []);
+    }, 90);
 
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    let raf = 0;
-    const cols = Math.floor(window.innerWidth / 14);
-    let drops = Array.from({ length: cols }).map(() => 0);
+    return () => window.clearInterval(timer);
+  }, [bootPhase]);
 
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    function draw() {
-      ctx.fillStyle = "rgba(0,0,0,0.12)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "14px monospace";
-      for (let i = 0; i < drops.length; i++) {
-        const text = String.fromCharCode(0x30a0 + Math.random() * 96);
-        ctx.fillStyle = i % 6 === 0 ? "#7c3aed" : "#1e293b";
-        ctx.fillText(text, i * 14, drops[i] * 14);
-        if (drops[i] * 14 > canvas.height && Math.random() > 0.98) drops[i] = 0;
-        drops[i]++;
-      }
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
+  function handleEnterHome() {
+    setBootPhase("dashboard");
+    setDashboardView("home");
+  }
 
   function handleProjects() {
-    setPhase("home");
-    setTimeout(() => labRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
+    setBootPhase("dashboard");
+    setDashboardView("projects");
+    setTimeout(() => projectsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 500);
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      <canvas ref={canvasRef} className="canvas-full pointer-events-none" />
+    <main className="relative min-h-screen overflow-hidden bg-black font-mono text-[#22c55e]">
+      <div className="absolute inset-0 bg-black" />
 
-      <AnimatePresence>
-        {phase !== "home" && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0 z-40 flex items-center justify-center"
+      <AnimatePresence mode="wait">
+        {bootPhase !== "dashboard" && (
+          <motion.section
+            key="boot"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.55 }}
+            className="absolute inset-0 z-30 flex items-center justify-center px-6 py-12"
           >
-            <div className="text-center px-5">
-              <div className="mb-6">
-                <div className="text-xs tracking-[0.35em] text-slate-500">SYSTEM BOOTING / AI / MEDIA / PRODUCT</div>
-                <div className="mt-3 text-5xl font-mono font-semibold">{loaded}%</div>
+            <div className="w-full max-w-4xl rounded-[36px] border border-[#22c55e]/20 bg-[#07110d]/95 p-8 shadow-[0_0_90px_rgba(34,197,94,0.18)] backdrop-blur-sm">
+              <div className="text-xs uppercase tracking-[0.55em] text-[#86efac]/95">INITIALIZING SYSTEM ARCHITECTURE...</div>
+
+              <div className="mt-8 rounded-[28px] border border-[#22c55e]/15 bg-[#08110d] p-6">
+                <div className="flex items-center justify-between text-sm uppercase tracking-[0.35em] text-[#86efac]/90">
+                  <span>BOOT CALIBRATION</span>
+                  <span>{progress}%</span>
+                </div>
+
+                <div className="mt-4 h-4 overflow-hidden rounded-full border border-[#22c55e]/25 bg-[#061007]">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="h-full bg-[#22c55e]"
+                  />
+                </div>
+
+                <div className="mt-6 space-y-3 text-[13px] leading-6 text-[#c7f9d2]">
+                  {terminalLog.slice(-5).map((line, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
+                      <span>{line}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {phase === "menu" && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                  <button onClick={() => setPhase("home")} className="px-6 py-3 rounded-2xl bg-gradient-to-b from-[#111827] to-[#071029] border border-white/10">LAUNCH CONSOLE</button>
-                  <button onClick={handleProjects} className="px-6 py-3 rounded-2xl bg-[#02111a] border border-white/10">EXPLORE PROJECTS</button>
-                  <button onClick={() => setContactOpen(true)} className="px-6 py-3 rounded-2xl bg-[#02111a] border border-white/10">OPEN CONTACT</button>
+              {bootPhase === "menu" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 0.1 }}
+                  className="mt-12 grid gap-4 sm:grid-cols-3"
+                >
+                  <button
+                    onClick={handleEnterHome}
+                    className="rounded-3xl border border-[#22c55e]/25 bg-[#08100f] px-5 py-5 text-sm uppercase tracking-[0.35em] transition hover:border-[#22c55e]/40 hover:bg-[#0e180f]"
+                  >
+                    ENTER HOME
+                  </button>
+                  <button
+                    onClick={handleProjects}
+                    className="rounded-3xl border border-[#22c55e]/25 bg-[#08100f] px-5 py-5 text-sm uppercase tracking-[0.35em] transition hover:border-[#22c55e]/40 hover:bg-[#0e180f]"
+                  >
+                    PROJECTS
+                  </button>
+                  <button
+                    onClick={() => setDrawerOpen(true)}
+                    className="rounded-3xl border border-[#22c55e]/25 bg-[#08100f] px-5 py-5 text-sm uppercase tracking-[0.35em] transition hover:border-[#22c55e]/40 hover:bg-[#0e180f]"
+                  >
+                    CONTACT / BOOKING
+                  </button>
                 </motion.div>
               )}
             </div>
-          </motion.div>
+          </motion.section>
         )}
       </AnimatePresence>
 
-      <motion.section initial={{ opacity: 0 }} animate={{ opacity: phase === "home" ? 1 : 0 }} transition={{ duration: 0.8 }} className="relative z-10">
+      <motion.section
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: bootPhase === "dashboard" ? 1 : 0, y: bootPhase === "dashboard" ? 0 : 18 }}
+        transition={{ duration: 0.7 }}
+        className="relative z-10"
+      >
         <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Ricky Ransom / Systems & Strategy</p>
-              <h1 className="mt-4 text-5xl font-semibold text-white">Creative engineering for brand-driven AI products.</h1>
-              <p className="mt-4 text-slate-300 max-w-2xl">From startup launches to legal-tech dashboards, I build digital experiences that feel premium and move markets.</p>
+          <div className="grid gap-10 lg:grid-cols-[1.25fr_0.85fr]">
+            <div className="space-y-6">
+              <div className="text-xs uppercase tracking-[0.45em] text-[#86efac]/80">RICKY RANSOM, LLC</div>
+              <h1 className="text-5xl font-semibold leading-tight text-white">Dark-mode command launch for strategic product, AI, and brand experiences.</h1>
+              <p className="max-w-2xl text-slate-300">A high-fidelity interface that bends bold creative systems, commercial momentum, and enterprise storytelling into a seamless launch matrix.</p>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <button onClick={handleEnterHome} className="rounded-[28px] border border-[#22c55e]/20 bg-[#081010] px-6 py-4 text-left transition hover:bg-[#0f1910]">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/90">CORE</p>
+                  <p className="mt-2 text-lg font-semibold">ENTER HOME</p>
+                </button>
+                <button onClick={handleProjects} className="rounded-[28px] border border-[#22c55e]/20 bg-[#081010] px-6 py-4 text-left transition hover:bg-[#0f1910]">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/90">DECK</p>
+                  <p className="mt-2 text-lg font-semibold">PROJECTS</p>
+                </button>
+                <button onClick={() => setDrawerOpen(true)} className="rounded-[28px] border border-[#22c55e]/20 bg-[#081010] px-6 py-4 text-left transition hover:bg-[#0f1910]">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/90">SIGNAL</p>
+                  <p className="mt-2 text-lg font-semibold">CONTACT / BOOKING</p>
+                </button>
+              </div>
             </div>
-            <button onClick={() => setContactOpen(true)} className="rounded-3xl bg-[rgba(227,173,43,0.95)] px-6 py-3 text-sm font-semibold text-slate-900">Book a discovery intake</button>
+
+            <div className="rounded-[32px] border border-[#22c55e]/10 bg-[#071210]/95 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.16)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.35em] text-[#86efac]/80">COMMAND STATUS</div>
+                  <p className="mt-3 text-2xl font-semibold text-white">Operational. Ready for briefing.</p>
+                </div>
+                <div className="rounded-3xl bg-[#08150f] px-4 py-3 text-sm text-[#c7f9d2]">LIVE</div>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl border border-[#22c55e]/10 bg-[#08120f] p-4">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/80">Pulse</p>
+                  <p className="mt-3 text-lg font-semibold">Focused launch cadence</p>
+                </div>
+                <div className="rounded-3xl border border-[#22c55e]/10 bg-[#08120f] p-4">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/80">Signal</p>
+                  <p className="mt-3 text-lg font-semibold">Premium inbound pipeline</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div ref={labRef} id="lab" className="mt-16 grid gap-6 md:grid-cols-3">
-            <div className="rounded-3xl bg-[#07121a] p-8 border border-white/10 shadow-xl shadow-[#0b122a]/20">
-              <h2 className="text-xl font-semibold">The Lab</h2>
-              <p className="mt-3 text-slate-300">High-impact case studies with premium interaction, polish, and product storytelling.</p>
+          <section className="mt-16 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {serviceGrid.map((service) => (
+              <div key={service.title} className="rounded-[28px] border border-[#22c55e]/10 bg-[#07120f] p-6 transition hover:border-[#22c55e]/30">
+                <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/80">SERVICE</p>
+                <h2 className="mt-4 text-xl font-semibold text-white">{service.title}</h2>
+                <p className="mt-3 text-slate-300">{service.detail}</p>
+              </div>
+            ))}
+          </section>
+
+          <section ref={projectsRef} className="mt-20 space-y-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.45em] text-[#86efac]/70">THE LAB</p>
+                <h2 className="mt-3 text-3xl font-semibold text-white">Project decks & launch storyboards</h2>
+              </div>
             </div>
-            <div className="rounded-3xl bg-[#07121a] p-8 border border-white/10 shadow-xl shadow-[#0b122a]/20">
-              <h2 className="text-xl font-semibold">Services</h2>
-              <p className="mt-3 text-slate-300">AI strategy, UX systems, content production, and product launch consulting for modern B2B brands.</p>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {portfolioDeck.map((item) => (
+                <div key={item.title} className="rounded-[32px] border border-[#22c55e]/10 bg-[#08130f] p-6">
+                  <span className="text-xs uppercase tracking-[0.35em] text-[#86efac]/80">{item.title}</span>
+                  <h3 className="mt-4 text-2xl font-semibold text-white">{item.role}</h3>
+                  <p className="mt-3 text-slate-300">{item.accent}</p>
+                </div>
+              ))}
             </div>
-            <div className="rounded-3xl bg-[#07121a] p-8 border border-white/10 shadow-xl shadow-[#0b122a]/20">
-              <h2 className="text-xl font-semibold">Contact</h2>
-              <p className="mt-3 text-slate-300">Schedule creative direction, keynote strategy, or a custom engagement.</p>
-            </div>
-          </div>
+          </section>
         </div>
       </motion.section>
 
       <AnimatePresence>
-        {contactOpen && (
-          <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 300 }} className="fixed right-0 top-0 z-50 h-full w-full md:w-96 bg-[#02111a] p-6 shadow-2xl">
-            <ContactDrawer onClose={() => setContactOpen(false)} />
+        {drawerOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: 80 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            className="fixed right-0 top-0 z-50 h-full w-full md:w-[420px]"
+          >
+            <div className="h-full overflow-hidden rounded-l-[36px] border-l border-[#22c55e]/20 bg-[#071210] shadow-[0_0_60px_rgba(0,0,0,0.25)]">
+              <ContactDrawer onClose={() => setDrawerOpen(false)} />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -139,44 +255,51 @@ function ContactDrawer({ onClose }: { onClose: () => void }) {
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [budget, setBudget] = useState("$10k - $50k");
-  const [service, setService] = useState("AI Consulting & Workflows");
+  const [service, setService] = useState("Book Ricky for Keynote Speaking");
   const [submitted, setSubmitted] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
 
-  function handleSubmit(e?: React.FormEvent) {
-    e?.preventDefault();
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (submitted) return;
     setSubmitted(true);
-    setTimeout(() => {
-      alert('Request submitted — a member of the team will follow up.');
+    setConfirmation("SUBMIT SIGNAL RECEIVED — REQUEST QUEUED FOR REVIEW.");
+    window.setTimeout(() => {
+      setSubmitted(false);
+      setConfirmation("");
       onClose();
-    }, 900);
+    }, 1600);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="h-full flex flex-col">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Contact — Intake</h2>
-        <button type="button" onClick={onClose} className="text-sm text-slate-300">Close</button>
+    <form onSubmit={handleSubmit} className="flex h-full flex-col p-6">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.35em] text-[#86efac]/85">Contact / Booking</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">Service Request Portal</h2>
+        </div>
+        <button type="button" onClick={onClose} className="rounded-2xl border border-[#22c55e]/20 bg-[#08120f] px-4 py-2 text-sm text-[#c7f9d2] transition hover:bg-[#0f1910]">CLOSE</button>
       </div>
 
-      <div className="mt-4 space-y-3 flex-1 overflow-auto">
+      <div className="mt-6 flex-1 space-y-4 overflow-auto pr-1">
         <label className="block">
-          <div className="text-xs text-slate-400">Full name</div>
-          <input required value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md bg-[#01121a] p-2 text-white outline-none" />
+          <span className="text-xs uppercase tracking-[0.25em] text-[#86efac]/80">Full Name</span>
+          <input required value={name} onChange={(event) => setName(event.target.value)} className="mt-2 w-full rounded-3xl border border-[#22c55e]/15 bg-[#08120f] px-4 py-3 text-sm text-white outline-none focus:border-[#22c55e]" />
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-400">Company</div>
-          <input value={company} onChange={(e) => setCompany(e.target.value)} className="mt-1 w-full rounded-md bg-[#01121a] p-2 text-white outline-none" />
+          <span className="text-xs uppercase tracking-[0.25em] text-[#86efac]/80">Company Name</span>
+          <input value={company} onChange={(event) => setCompany(event.target.value)} className="mt-2 w-full rounded-3xl border border-[#22c55e]/15 bg-[#08120f] px-4 py-3 text-sm text-white outline-none focus:border-[#22c55e]" />
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-400">Email address</div>
-          <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-md bg-[#01121a] p-2 text-white outline-none" />
+          <span className="text-xs uppercase tracking-[0.25em] text-[#86efac]/80">Email Address</span>
+          <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-2 w-full rounded-3xl border border-[#22c55e]/15 bg-[#08120f] px-4 py-3 text-sm text-white outline-none focus:border-[#22c55e]" />
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-400">Project budget</div>
-          <select value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1 w-full rounded-md bg-[#01121a] p-2 text-white outline-none">
+          <span className="text-xs uppercase tracking-[0.25em] text-[#86efac]/80">Project Budget Tier</span>
+          <select value={budget} onChange={(event) => setBudget(event.target.value)} className="mt-2 w-full rounded-3xl border border-[#22c55e]/15 bg-[#08120f] px-4 py-3 text-sm text-white outline-none focus:border-[#22c55e]">
             <option>$5k - $10k</option>
             <option>$10k - $50k</option>
             <option>$50k - $150k</option>
@@ -185,8 +308,8 @@ function ContactDrawer({ onClose }: { onClose: () => void }) {
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-400">Service request</div>
-          <select value={service} onChange={(e) => setService(e.target.value)} className="mt-1 w-full rounded-md bg-[#01121a] p-2 text-white outline-none">
+          <span className="text-xs uppercase tracking-[0.25em] text-[#86efac]/80">Service Request Type</span>
+          <select value={service} onChange={(event) => setService(event.target.value)} className="mt-2 w-full rounded-3xl border border-[#22c55e]/15 bg-[#08120f] px-4 py-3 text-sm text-white outline-none focus:border-[#22c55e]">
             <option>Book Ricky for Keynote Speaking</option>
             <option>AI Consulting & Workflows</option>
             <option>Custom Web & Software Architecture</option>
@@ -194,9 +317,13 @@ function ContactDrawer({ onClose }: { onClose: () => void }) {
         </label>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-slate-400">Secure routing & confirmation</div>
-        <button type="submit" disabled={submitted} className="rounded-2xl bg-[rgba(227,173,43,0.95)] px-4 py-2 font-semibold text-slate-900">{submitted ? 'Submitting…' : 'Submit request'}</button>
+      <div className="mt-6 space-y-4">
+        <button type="submit" disabled={submitted} className="w-full rounded-3xl bg-[#22c55e] px-5 py-4 text-sm font-semibold text-slate-950 transition hover:bg-[#86efac] disabled:opacity-70">{submitted ? "SUBMITTING SIGNAL…" : "SUBMIT SIGNAL"}</button>
+        {confirmation ? (
+          <div className="rounded-3xl border border-[#22c55e]/20 bg-[#08120f] px-4 py-3 text-sm text-[#c7f9d2]">
+            <p className="text-[#22c55e]">{confirmation}</p>
+          </div>
+        ) : null}
       </div>
     </form>
   );
