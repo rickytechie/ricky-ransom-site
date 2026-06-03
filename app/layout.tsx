@@ -10,7 +10,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Ricky Ransom, LLC — Engineering Creativity",
+  title: "RKYRNSM PORTFOLIO",
   description: "High-end AI consulting, media services, keynote speaking, digital marketing, web design, and software consulting.",
 };
 

@@ -178,7 +178,7 @@ export default function HomePage() {
 
             <section className="mt-20 space-y-6" ref={projectsRef}>
               <div>
-                <p className="text-xs uppercase tracking-[0.45em] text-green-300">THE LAB</p>
+                <p className="text-xs uppercase tracking-[0.45em] text-green-300">PROJECTS</p>
                 <h2 className="mt-3 text-3xl font-semibold text-white">Project decks & launch storyboards</h2>
               </div>
 

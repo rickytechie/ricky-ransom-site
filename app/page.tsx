@@ -204,9 +204,10 @@ export default function Home() {
             <h1 className="text-xl font-semibold tracking-tight text-white">Engineering Creativity</h1>
           </div>
           <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+            <a href="/" className="transition hover:text-violet-300">PORTFOLIO LOBBY</a>
             <a href="#services" className="transition hover:text-violet-300">Services</a>
-            <a href="#lab" className="transition hover:text-violet-300">The Lab</a>
-            <a href="/music" className="transition hover:text-violet-300">Music</a>
+            <a href="#projects" className="transition hover:text-violet-300">PROJECTS</a>
+            <a href="/music" className="transition hover:text-violet-300">MUSIC</a>
             <a href="#contact" className="transition hover:text-violet-300">Contact</a>
           </nav>
         </div>
@@ -429,10 +430,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="lab" className="mx-auto max-w-7xl px-6 pb-20 lg:pb-24">
+      <section id="projects" className="mx-auto max-w-7xl px-6 pb-20 lg:pb-24">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-violet-300/80">The Lab</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-violet-300/80">Projects</p>
             <h2 className="mt-4 text-4xl font-semibold text-white sm:text-5xl">All projects in the portfolio</h2>
           </div>
           <p className="max-w-xl text-slate-400">
