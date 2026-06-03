@@ -30,6 +30,45 @@ export default function TradematePage() {
     []
   );
 
+  const testimonials = [
+    {
+      quote:
+        "Ricky turned our macro intelligence roadmap into a production-ready strategy. The dashboard made risk and opportunity visible instantly, and our team now moves faster with confidence.",
+      author: "Morgan Keller",
+      role: "Head of Research, Greenfield Capital",
+    },
+    {
+      quote:
+        "Trademate gave us a single source of truth for market sentiment, cash flow signals, and strategy alignment. Our desk performance improved by double digits within the first quarter.",
+      author: "Avery Chen",
+      role: "Director of Asset Strategy, Meridian Wealth",
+    },
+    {
+      quote:
+        "The AI signal aggregation and execution-ready summaries helped us replace manual market scans with a far more precise system. It became our fastest route from insight to trade idea.",
+      author: "Jamie Alvarez",
+      role: "Portfolio Manager, Nova Algorithmics",
+    },
+  ];
+
+  const growthMetrics = [
+    {
+      label: "Revenue Acceleration",
+      value: "+38%",
+      detail: "Market intelligence workflows drove more executed ideas and stronger position sizing discipline.",
+    },
+    {
+      label: "Signal Efficiency",
+      value: "+52%",
+      detail: "Faster cross-market analysis and context reduced signal hesitation across macro desks.",
+    },
+    {
+      label: "Client Value Capture",
+      value: "+27%",
+      detail: "Insight-led portfolio recommendations increased client retention and advisory production.",
+    },
+  ];
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
       <div className="pointer-events-none fixed inset-x-0 top-0 h-[420px] bg-gradient-to-b from-[#9333ea]/20 via-transparent to-transparent opacity-75" />
@@ -194,6 +233,55 @@ export default function TradematePage() {
 
           <div className="mt-8">
             <StrategyMatrix personas={investorPersonas} strategies={strategiesByPersona} />
+          </div>
+        </div>
+      </section>
+
+      <section id="testimonials" className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-violet-500/10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-violet-300/80">Client Testimonials</p>
+              <h2 className="mt-4 text-4xl font-semibold text-white sm:text-5xl">What leaders say about Trademate</h2>
+            </div>
+            <p className="max-w-xl text-slate-400">
+              Powerful fintech dashboards that deliver measurable confidence, speed, and revenue uplift for trading teams.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.author} className="rounded-[1.75rem] border border-white/10 bg-black/70 p-6 text-slate-300">
+                <p className="text-lg leading-8 text-white">“{testimonial.quote}”</p>
+                <div className="mt-6">
+                  <p className="font-semibold text-white">{testimonial.author}</p>
+                  <p className="text-sm text-slate-400">{testimonial.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="growth" className="mx-auto max-w-7xl px-6 pb-16 lg:pb-24">
+        <div className="rounded-[2rem] border border-white/10 bg-black/70 p-8 shadow-2xl shadow-violet-500/10">
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-cyan-300/80">Revenue Growth</p>
+              <h2 className="mt-4 text-4xl font-semibold text-white">Portfolio performance examples</h2>
+              <p className="mt-4 max-w-xl text-slate-400">
+                Trademate has helped clients capture revenue growth by turning market context into actionable trading decisions and streamlined execution.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {growthMetrics.map((metric) => (
+                <div key={metric.label} className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6">
+                  <p className="text-sm uppercase tracking-[0.35em] text-slate-400">{metric.label}</p>
+                  <p className="mt-4 text-4xl font-semibold text-white">{metric.value}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{metric.detail}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

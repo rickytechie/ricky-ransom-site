@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const missionStatement =
   "I deliver end-to-end consulting designed to future-proof your business by intersecting art and intelligence. My primary focus areas include high-impact AI Consulting & Training, full-scale Media Services, and dynamic Keynote Speaking. Additionally, I architect growth through data-driven Digital Marketing, custom Web Design & Development, and robust Software Consulting. Whether optimizing workflows, crafting high-end digital media assets, or building scalable software applications, I provide the precise strategic oversight and technical execution needed to elevate your brand's potential.";
@@ -107,14 +107,6 @@ const portfolioItems = [
     featured: true,
   },
   {
-    title: "ClassyHop",
-    subtitle: "Browser-based DAW simulator blending classical composition with modern production.",
-    description:
-      "A premium audio workstation demo that pairs legendary classical motifs with Hip Hop, Pop, and Jazz loop engines in a dark studio interface.",
-    link: "/portfolio/classyhop",
-    featured: true,
-  },
-  {
     title: "Super Samurai",
     subtitle: "2D platformer arcade showcase with custom physics engine and AI-driven combat.",
     description:
@@ -155,10 +147,50 @@ const latestProjects = portfolioItems.filter((project) => project.featured).slic
 
 export default function Home() {
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
+  const [entered, setEntered] = useState(false);
+  const [landingReady, setLandingReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLandingReady(true), 1700);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const activeService = useMemo(
     () => services.find((service) => service.id === activeServiceId) ?? null,
     [activeServiceId]
   );
+
+  if (!entered) {
+    return (
+      <main className="min-h-screen bg-black text-white">
+        <div className="flex min-h-screen items-center justify-center px-6 text-center">
+          <div className="max-w-2xl space-y-10">
+            <div className="space-y-6">
+              <p className="text-5xl font-black uppercase tracking-[0.28em] sm:text-6xl">RICKY RANSOM</p>
+              <div className="flex items-center justify-center gap-3">
+                {[0, 1, 2].map((delay) => (
+                  <span
+                    key={delay}
+                    className="h-3 w-3 rounded-full bg-white animate-pulse"
+                    style={{ animationDelay: `${delay * 0.2}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={!landingReady}
+              onClick={() => setEntered(true)}
+              className="mx-auto rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-[0.25em] text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {landingReady ? "Enter the site" : "Loading..."}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -174,6 +206,7 @@ export default function Home() {
           <nav className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
             <a href="#services" className="transition hover:text-violet-300">Services</a>
             <a href="#lab" className="transition hover:text-violet-300">The Lab</a>
+            <a href="/music" className="transition hover:text-violet-300">Music</a>
             <a href="#contact" className="transition hover:text-violet-300">Contact</a>
           </nav>
         </div>
