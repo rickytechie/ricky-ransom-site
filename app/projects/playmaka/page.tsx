@@ -8,8 +8,6 @@ import {
   Sparkles,
   TrendingUp,
   ArrowRight,
-  Football,
-  Basketball,
   Trophy,
   Shield,
   Clock3,
