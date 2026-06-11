@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Activity,
   BarChart3,
@@ -11,10 +11,32 @@ import {
   Trophy,
   Shield,
   Clock3,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
+type SportsEvent = {
+  id: string;
+  sport_key: string;
+  sport_title: string;
+  commence_time: string;
+  home_team: string;
+  away_team: string;
+  bookmakers?: Array<{
+    key: string;
+    title: string;
+    markets: Array<{
+      key: string;
+      outcomes: Array<{
+        name: string;
+        price: number;
+      }>;
+    }>;
+  }>;
+};
+
 type Matchup = {
-  id: number;
+  id: string;
   teams: string;
   sport: string;
   play: string;
@@ -22,6 +44,7 @@ type Matchup = {
   tier: "Elite" | "Premium" | "High Value";
   odds: string;
   market: string;
+  commenceTime: string;
 };
 
 const sidebarLinks = [
@@ -31,102 +54,148 @@ const sidebarLinks = [
   { label: "Value Alerts", icon: Sparkles },
 ];
 
-const kpis = [
-  {
-    label: "Top Algorithm Pick",
-    value: "MIA vs. ATL",
-    detail: "76.8% model edge with cross-market arbitrage.",
-    icon: TrendingUp,
-  },
-  {
-    label: "Aggregated Feeds",
-    value: "12 sources",
-    detail: "Live market, lines, liquidity, and sentiment fused.",
-    icon: BarChart3,
-  },
-  {
-    label: "Risk Mitigation",
-    value: "95% coverage",
-    detail: "Auto hedge and volatility exposure signals applied.",
-    icon: Shield,
-  },
-];
-
-const matchups: Matchup[] = [
-  {
-    id: 1,
-    teams: "Miami Heat vs. Atlanta Hawks",
-    sport: "NBA",
-    play: "Under 215.5, 1H",
-    confidence: "76%",
-    tier: "Elite",
-    odds: "-110",
-    market: "Total/Spread",
-  },
-  {
-    id: 2,
-    teams: "Liverpool vs. Arsenal",
-    sport: "Soccer",
-    play: "Value draw, 2H",
-    confidence: "71%",
-    tier: "Premium",
-    odds: "+180",
-    market: "Match Result",
-  },
-  {
-    id: 3,
-    teams: "New York Yankees vs. Boston Red Sox",
-    sport: "MLB",
-    play: "Over 8.5 runs",
-    confidence: "69%",
-    tier: "High Value",
-    odds: "-125",
-    market: "Totals",
-  },
-  {
-    id: 4,
-    teams: "Golden State Warriors vs. Phoenix Suns",
-    sport: "NBA",
-    play: "Warriors +4.5",
-    confidence: "74%",
-    tier: "Elite",
-    odds: "+140",
-    market: "Spread",
-  },
-  {
-    id: 5,
-    teams: "Dallas Cowboys vs. Philadelphia Eagles",
-    sport: "NFL",
-    play: "Cowboys -3, live",
-    confidence: "72%",
-    tier: "Premium",
-    odds: "-150",
-    market: "Spread/Live",
-  },
-];
-
 const tierStyles = {
   Elite: "bg-emerald-400/10 text-emerald-300 border border-emerald-300/10",
   Premium: "bg-sky-400/10 text-sky-300 border border-sky-300/10",
   "High Value": "bg-violet-400/10 text-violet-300 border border-violet-300/10",
 };
 
+function calculateConfidence(odds: number): string {
+  // Convert decimal odds to implied probability
+  const probability = (1 / odds) * 100;
+  if (probability >= 70) return "Elite";
+  if (probability >= 55) return "Premium";
+  return "High Value";
+}
+
+function extractOdds(event: SportsEvent): string {
+  if (!event.bookmakers || event.bookmakers.length === 0) return "-";
+  const bookmaker = event.bookmakers[0];
+  if (!bookmaker.markets || bookmaker.markets.length === 0) return "-";
+  const market = bookmaker.markets[0];
+  if (!market.outcomes || market.outcomes.length === 0) return "-";
+  return market.outcomes[0].price?.toFixed(2) || "-";
+}
+
+function extractBestPlay(event: SportsEvent): string {
+  const odds = extractOdds(event);
+  if (!event.bookmakers || event.bookmakers.length === 0) {
+    return `Monitor line: ${event.home_team} vs ${event.away_team}`;
+  }
+  const bookmaker = event.bookmakers[0];
+  if (!bookmaker.markets || bookmaker.markets.length === 0)
+    return `Value spot detected`;
+
+  const market = bookmaker.markets[0];
+  const marketLabel = market.key === "spreads" ? "Spread" : "Total";
+  const outcome = market.outcomes?.[0];
+
+  if (outcome) {
+    return `${outcome.name} @ ${outcome.price?.toFixed(2)}`;
+  }
+  return marketLabel;
+}
+
 export default function PlaymakaPage() {
-  const [selectedId, setSelectedId] = useState(matchups[0].id);
+  const [matchups, setMatchups] = useState<Matchup[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+
+  // Fetch real-time sports data
+  useEffect(() => {
+    const fetchSportsData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/odds");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch odds data");
+        }
+
+        const data = await response.json();
+        const events = data.events || [];
+
+        // Transform API events to matchup format
+        const transformedMatchups: Matchup[] = events
+          .slice(0, 12)
+          .map((event: SportsEvent, index: number) => {
+            const odds = extractOdds(event);
+            const oddsValue = parseFloat(odds) || 1.5;
+            const tier = calculateConfidence(oddsValue) as
+              | "Elite"
+              | "Premium"
+              | "High Value";
+
+            return {
+              id: event.id || `event-${index}`,
+              teams: `${event.away_team} @ ${event.home_team}`,
+              sport: event.sport_title || "Sports",
+              play: extractBestPlay(event),
+              confidence: `${Math.round((1 / oddsValue) * 100)}%`,
+              tier,
+              odds: odds,
+              market: event.bookmakers?.[0]?.markets?.[0]?.key || "spreads",
+              commenceTime: event.commence_time,
+            };
+          });
+
+        setMatchups(transformedMatchups);
+        if (transformedMatchups.length > 0 && !selectedId) {
+          setSelectedId(transformedMatchups[0].id);
+        }
+        setError(null);
+        setLastUpdate(new Date());
+      } catch (err) {
+        console.error("Error fetching sports data:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load sports data"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSportsData();
+
+    // Auto-refresh every 60 seconds
+    const interval = autoRefresh ? setInterval(fetchSportsData, 60000) : null;
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [autoRefresh, selectedId]);
 
   const selectedMatchup = useMemo(
-    () => matchups.find((row) => row.id === selectedId) ?? matchups[0],
-    [selectedId]
+    () => matchups.find((m) => m.id === selectedId) ?? matchups[0],
+    [selectedId, matchups]
   );
 
   const sportSummary = useMemo(
     () =>
-      matchups.reduce((acc, row) => {
-        acc[row.sport] = (acc[row.sport] ?? 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
-    []
+      matchups.reduce(
+        (acc, row) => {
+          acc[row.sport] = (acc[row.sport] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+    [matchups]
   );
+
+  const topPick = useMemo(() => {
+    const eliteMatches = matchups.filter((m) => m.tier === "Elite");
+    return eliteMatches[0] || matchups[0];
+  }, [matchups]);
+
+  const updateTime = useMemo(() => {
+    const now = new Date();
+    const diff = now.getTime() - lastUpdate.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes === 0) return "just now";
+    return `${minutes}m ago`;
+  }, [lastUpdate]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -139,15 +208,15 @@ export default function PlaymakaPage() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/15 bg-cyan-400/5 px-4 py-2 text-xs uppercase tracking-[0.35em] text-cyan-300">
                 <Sparkles className="h-4 w-4" />
-                Desktop-first market intelligence
+                Live sports data aggregator
               </div>
               <div className="space-y-4">
                 <p className="text-sm uppercase tracking-[0.35em] text-slate-400">PLAYMAKA</p>
                 <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-                  A premium sports data aggregator dashboard for optimal value plays.
+                  Real-time sports market analysis for optimal play discovery.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                  High-performance desktop analytics that blends live market feeds, probability modeling, and confidence-tier scoring to surface the next best plays with enterprise-grade precision.
+                  Live sports events, real-time odds aggregation, and intelligent confidence scoring to help bettors identify high-probability value plays across multiple markets and sportsbooks.
                 </p>
               </div>
             </div>
@@ -155,21 +224,48 @@ export default function PlaymakaPage() {
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:w-[320px]">
               <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-4 text-slate-300">
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Status</p>
-                <p className="mt-3 text-xl font-semibold text-white">Live aggregation</p>
+                <p className="mt-3 text-xl font-semibold text-white">
+                  {loading ? "Loading..." : "Live"}
+                </p>
               </div>
               <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-4 text-slate-300">
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Edge</p>
-                <p className="mt-3 text-xl font-semibold text-emerald-300">Algorithmic alpha</p>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Updated</p>
+                <p className="mt-3 text-xl font-semibold text-emerald-300">
+                  {updateTime}
+                </p>
               </div>
             </div>
           </div>
         </header>
 
+        {error && (
+          <div className="mb-6 flex items-center gap-3 rounded-[2rem] border border-amber-400/20 bg-amber-400/5 p-4 text-amber-300">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
         <div className="grid flex-1 gap-6 xl:grid-cols-[300px_1fr]">
           <aside className="space-y-6 rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 shadow-2xl shadow-slate-900/40">
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Navigation</p>
-              <h2 className="text-2xl font-semibold text-white">PLAYMAKA Console</h2>
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+                  Navigation
+                </p>
+                <h2 className="text-2xl font-semibold text-white">PLAYMAKA</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`rounded-full p-2 transition ${
+                  autoRefresh
+                    ? "bg-cyan-400/10 text-cyan-300"
+                    : "bg-slate-800/50 text-slate-400"
+                }`}
+                title={autoRefresh ? "Auto-refresh on" : "Auto-refresh off"}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
             </div>
 
             <nav className="space-y-2">
@@ -190,12 +286,15 @@ export default function PlaymakaPage() {
 
             <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.35em] text-slate-500">
-                <span>Live sport mix</span>
-                <span>{matchups.length} events</span>
+                <span>Events</span>
+                <span>{matchups.length}</span>
               </div>
               <div className="mt-5 space-y-3">
                 {Object.entries(sportSummary).map(([sport, count]) => (
-                  <div key={sport} className="flex items-center justify-between rounded-3xl border border-white/5 bg-slate-950/70 px-4 py-3 text-sm text-slate-200">
+                  <div
+                    key={sport}
+                    className="flex items-center justify-between rounded-3xl border border-white/5 bg-slate-950/70 px-4 py-3 text-sm text-slate-200"
+                  >
                     <span>{sport}</span>
                     <span className="font-semibold text-white">{count}</span>
                   </div>
@@ -203,109 +302,152 @@ export default function PlaymakaPage() {
               </div>
             </div>
 
-            <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Selected play</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{selectedMatchup.sport}</p>
+            {selectedMatchup && (
+              <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                      Selected
+                    </p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {selectedMatchup.sport}
+                    </p>
+                  </div>
+                  <Clock3 className="h-5 w-5 text-cyan-300" />
                 </div>
-                <Clock3 className="h-5 w-5 text-cyan-300" />
+                <div className="mt-4 space-y-3 text-sm text-slate-300">
+                  <p>{selectedMatchup.teams}</p>
+                  <p>{selectedMatchup.play}</p>
+                  <p className="text-slate-400">
+                    Odds: {selectedMatchup.odds}
+                  </p>
+                </div>
               </div>
-              <div className="mt-4 space-y-3 text-sm text-slate-300">
-                <p>{selectedMatchup.teams}</p>
-                <p>{selectedMatchup.play}</p>
-                <p className="text-slate-400">Market: {selectedMatchup.market}</p>
-              </div>
-            </div>
+            )}
           </aside>
 
           <section className="space-y-6">
             <div className="grid gap-4 lg:grid-cols-3">
-              {kpis.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <article key={item.label} className="rounded-[2rem] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-900/20">
+              {topPick && (
+                <>
+                  <article className="rounded-[2rem] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-900/20 lg:col-span-2">
                     <div className="flex items-center gap-3 text-cyan-300">
-                      <Icon className="h-5 w-5" />
-                      <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{item.label}</p>
+                      <TrendingUp className="h-5 w-5" />
+                      <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+                        Top Algorithm Pick
+                      </p>
                     </div>
-                    <p className="mt-5 text-3xl font-semibold text-white">{item.value}</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">{item.detail}</p>
+                    <p className="mt-5 text-3xl font-semibold text-white">
+                      {topPick.teams}
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-slate-400">
+                      {topPick.play} · Confidence: {topPick.confidence}
+                    </p>
                   </article>
-                );
-              })}
+                  <article className="rounded-[2rem] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-900/20">
+                    <div className="flex items-center gap-3 text-emerald-300">
+                      <Trophy className="h-5 w-5" />
+                      <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+                        Confidence Score
+                      </p>
+                    </div>
+                    <p className="mt-5 text-3xl font-semibold text-white">
+                      {topPick.confidence}
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-slate-400">
+                      Market edge detected from odds aggregation
+                    </p>
+                  </article>
+                </>
+              )}
             </div>
 
             <div className="rounded-[2rem] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-900/20">
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Interactive match matrix</p>
-                  <h2 className="mt-3 text-3xl font-semibold text-white">Suggested value plays</h2>
+                  <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+                    Interactive match matrix
+                  </p>
+                  <h2 className="mt-3 text-3xl font-semibold text-white">
+                    {loading ? "Loading events..." : "Live value plays"}
+                  </h2>
                 </div>
                 <div className="flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-4 py-2 text-sm text-slate-300">
-                  <TrendingUp className="h-4 w-4 text-cyan-300" />
-                  Market plays ranked by confidence and edge
+                  <BarChart3 className="h-4 w-4 text-cyan-300" />
+                  Real-time odds from top sportsbooks
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-[1.5rem] border border-white/10">
-                <table className="min-w-full border-collapse text-left text-sm">
-                  <thead className="bg-slate-950/90 text-slate-400">
-                    <tr>
-                      <th className="px-4 py-4">Matchup</th>
-                      <th className="px-4 py-4">Sport</th>
-                      <th className="px-4 py-4">Suggested Play</th>
-                      <th className="px-4 py-4">Confidence</th>
-                      <th className="px-4 py-4">Tier</th>
-                      <th className="px-4 py-4">Odds</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 bg-slate-950/80">
-                    {matchups.map((row) => (
-                      <tr
-                        key={row.id}
-                        className={`cursor-pointer transition ${
-                          row.id === selectedId ? "bg-slate-900/90" : "hover:bg-slate-900/70"
-                        }`}
-                        onClick={() => setSelectedId(row.id)}
-                      >
-                        <td className="px-4 py-4 align-middle text-sm text-slate-100">
-                          <div className="font-semibold text-white">{row.teams}</div>
-                          <div className="mt-1 text-xs text-slate-500">{row.market}</div>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-slate-200">{row.sport}</td>
-                        <td className="px-4 py-4 text-sm text-slate-200">{row.play}</td>
-                        <td className="px-4 py-4 text-sm text-emerald-300">{row.confidence}</td>
-                        <td className="px-4 py-4 text-sm">
-                          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] ${tierStyles[row.tier]}`}>
-                            {row.tier}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-slate-200">{row.odds}</td>
+              {loading ? (
+                <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-8 text-center">
+                  <RefreshCw className="mx-auto h-8 w-8 animate-spin text-cyan-300" />
+                  <p className="mt-4 text-slate-400">
+                    Fetching live sports data...
+                  </p>
+                </div>
+              ) : matchups.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/80 p-8 text-center">
+                  <AlertCircle className="mx-auto h-8 w-8 text-amber-300" />
+                  <p className="mt-4 text-slate-400">
+                    No events available at this time
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-[1.5rem] border border-white/10">
+                  <table className="min-w-full border-collapse text-left text-sm">
+                    <thead className="bg-slate-950/90 text-slate-400">
+                      <tr>
+                        <th className="px-4 py-4">Event</th>
+                        <th className="px-4 py-4">Sport</th>
+                        <th className="px-4 py-4">Play</th>
+                        <th className="px-4 py-4">Confidence</th>
+                        <th className="px-4 py-4">Tier</th>
+                        <th className="px-4 py-4">Odds</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/80 p-5">
-                  <div className="flex items-center gap-3 text-sm text-slate-400">
-                    <Trophy className="h-4 w-4 text-amber-300" />
-                    <span>Highest confidence signal</span>
-                  </div>
-                  <p className="mt-4 text-lg font-semibold text-white">{selectedMatchup.teams}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{selectedMatchup.play} at {selectedMatchup.confidence} confidence.</p>
-                </article>
-                <article className="rounded-[1.75rem] border border-white/10 bg-slate-950/80 p-5">
-                  <div className="flex items-center gap-3 text-sm text-slate-400">
-                    <ArrowRight className="h-4 w-4 text-cyan-300" />
-                    <span>Player-focused edge</span>
-                  </div>
-                  <p className="mt-4 text-lg font-semibold text-white">{selectedMatchup.play}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">Market: {selectedMatchup.market} · Odds: {selectedMatchup.odds}</p>
-                </article>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 bg-slate-950/80">
+                      {matchups.map((row) => (
+                        <tr
+                          key={row.id}
+                          className={`cursor-pointer transition ${
+                            row.id === selectedId
+                              ? "bg-slate-900/90"
+                              : "hover:bg-slate-900/70"
+                          }`}
+                          onClick={() => setSelectedId(row.id)}
+                        >
+                          <td className="px-4 py-4 align-middle text-sm text-slate-100">
+                            <div className="font-semibold text-white">
+                              {row.teams}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-200">
+                            {row.sport}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-200">
+                            {row.play}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-emerald-300">
+                            {row.confidence}
+                          </td>
+                          <td className="px-4 py-4 text-sm">
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] ${
+                                tierStyles[row.tier]
+                              }`}
+                            >
+                              {row.tier}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-200">
+                            {row.odds}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </section>
         </div>
