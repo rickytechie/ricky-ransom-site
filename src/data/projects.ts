@@ -1,5 +1,13 @@
 export const projects = [
   {
+    title: "PLAYMAKA",
+    category: "Sports Analytics",
+    description:
+      "A high-performance desktop analytics dashboard aggregating live sports market data and utilizing algorithmic probability tracking to surface optimal value plays.",
+    link: "/projects/playmaka",
+    featured: true,
+  },
+  {
     title: "Aurora Media Launch",
     category: "Media Services",
     description:

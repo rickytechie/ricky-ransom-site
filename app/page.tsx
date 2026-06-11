@@ -91,8 +91,17 @@ const portfolioItems = [
     featured: true,
   },
   {
+    title: "PLAYMAKA",
+    subtitle: "Desktop analytics dashboard for market play discovery and probability signals.",
+    description:
+      "A high-performance desktop analytics dashboard aggregating live sports market data and utilizing algorithmic probability tracking to surface optimal value plays.",
+    link: "/projects/playmaka",
+    featured: true,
+  },
+  {
     title: "VibeVenue",
     subtitle: "Hospitality-tech dashboard for venue atmosphere optimization, revenue capture, and IoT-driven operations.",
+
     description:
       "A premium hospitality case study showcasing AI/IoT integration, real-time analytics, and automated promotional workflows for luxury venues.",
     link: "/projects/vibevenue",
