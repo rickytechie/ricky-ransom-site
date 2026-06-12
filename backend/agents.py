@@ -2,27 +2,17 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-from crewai import Crew
+from crewai import Agent, Task, Crew
 from langchain_groq import ChatGroq
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY or GROQ_API_KEY.strip() == "your_key_here":
-    raise EnvironmentError(
-        "GROQ_API_KEY is missing or still set to the placeholder value. "
-        "Please replace backend/.env GROQ_API_KEY with your real Groq API key."
-    )
-
-
-def _normalize_agent_result(result) -> str:
-    if isinstance(result, dict):
-        for key in ("output_text", "output", "text"):
-            if key in result:
-                return str(result[key])
-        return str(result)
-    return str(result)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "your_key_here")
+if not GROQ_API_KEY or GROQ_API_KEY.strip() in ("", "your_key_here"):
+    # Allow placeholder for testing; production requires real key
+    print("⚠️  WARNING: GROQ_API_KEY not set. Using placeholder for testing only.")
+    print("   Add your real key to backend/.env: GROQ_API_KEY=your_actual_key")
 
 
 def _build_content_prompt(company_description: str) -> str:
@@ -53,26 +43,39 @@ def _build_lead_prompt(target_market: str) -> str:
         "1. Profile Name / Company Type:\n"
         "   - Role:\n"
         "   - Likely tech bottlenecks:\n"
-        "   - Outreach angle:\n"
+        "   - Outreach angle:"
     )
 
 
-def _run_agent(prompt: str, variable_name: str, value: str):
+def _run_agent(prompt: str, variable_name: str, value: str) -> str:
+    # Model config/API keys belong ONLY in the LLM/Agent definitions.
     groq_model = ChatGroq(api_key=GROQ_API_KEY, model="llama3-8b-8192")
-    crew = Crew(api_key=GROQ_API_KEY)
 
-    agent = crew.create_agent(
+    agent = Agent(
         name="Agentic Engine",
-        description=(
-            "A dual-agent workflow using CrewAI and Groq for content ideation and B2B lead research."
-        ),
-        model=groq_model,
+        description="A dual-agent workflow using CrewAI and Groq for content ideation and B2B lead research.",
+        llm=groq_model,
         instructions=prompt,
-        input_variables=[variable_name],
     )
 
-    result = agent.run({variable_name: value})
-    return _normalize_agent_result(result)
+    task = Task(
+        description=prompt,
+        expected_output="A plain text numbered list as requested by the prompt.",
+        agent=agent,
+    )
+
+    # Crew must receive ONLY agents, tasks, verbose=True (no config/api keys)
+    crew = Crew(
+        agents=[agent],
+        tasks=[task],
+        verbose=True,
+    )
+
+    crew_output = crew.kickoff(inputs={variable_name: value})
+
+    # Force clean serialization for FastAPI.
+    # CrewOutput is not JSON serializable; return a plain string.
+    return str(getattr(crew_output, "raw", crew_output))
 
 
 def run_content_generator(company_description: str) -> str:
@@ -85,3 +88,4 @@ def run_lead_research(target_market: str) -> str:
     """Run the Autonomous Lead Researcher workflow and return three B2B profile recommendations."""
     prompt = _build_lead_prompt(target_market)
     return _run_agent(prompt, "target_market", target_market)
+

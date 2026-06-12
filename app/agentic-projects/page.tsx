@@ -1,9 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const CONTENT_ENDPOINT = "http://127.0.0.1:8000/api/run-content-agent";
 const LEAD_ENDPOINT = "http://127.0.0.1:8000/api/run-lead-agent";
+
+const CONTENT_PHASES = [
+  "🤖 Initializing Content Strategy Agent...",
+  "🧠 Analyzing brand positioning and market gaps...",
+  "✍️  Crafting high-converting LinkedIn hooks...",
+  "🎯 Optimizing for engagement and CTR..."
+];
+
+const LEAD_PHASES = [
+  "🤖 Initializing Autonomous Lead Researcher...",
+  "🔍 Mapping market landscape and identifying targets...",
+  "🧠 Executing Llama 3 logic on Groq API hardware...",
+  "🎯 Compiling prospect profiles and outreach angles..."
+];
 
 export default function AgenticProjects() {
   const [companyDescription, setCompanyDescription] = useState("");
@@ -12,8 +26,28 @@ export default function AgenticProjects() {
   const [leadOutput, setLeadOutput] = useState("");
   const [loadingContent, setLoadingContent] = useState(false);
   const [loadingLead, setLoadingLead] = useState(false);
+  const [contentPhase, setContentPhase] = useState(0);
+  const [leadPhase, setLeadPhase] = useState(0);
   const [contentError, setContentError] = useState("");
   const [leadError, setLeadError] = useState("");
+
+  // Content loading phase animation
+  useEffect(() => {
+    if (!loadingContent) return;
+    const interval = setInterval(() => {
+      setContentPhase((p) => (p + 1) % CONTENT_PHASES.length);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [loadingContent]);
+
+  // Lead loading phase animation
+  useEffect(() => {
+    if (!loadingLead) return;
+    const interval = setInterval(() => {
+      setLeadPhase((p) => (p + 1) % LEAD_PHASES.length);
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [loadingLead]);
 
   const runContentAgent = async () => {
     setContentError("");
@@ -24,6 +58,7 @@ export default function AgenticProjects() {
     }
 
     setLoadingContent(true);
+    setContentPhase(0);
     try {
       const response = await fetch(CONTENT_ENDPOINT, {
         method: "POST",
@@ -51,6 +86,7 @@ export default function AgenticProjects() {
     }
 
     setLoadingLead(true);
+    setLeadPhase(0);
     try {
       const response = await fetch(LEAD_ENDPOINT, {
         method: "POST",
@@ -111,8 +147,14 @@ export default function AgenticProjects() {
               disabled={loadingContent}
               className="mt-6 inline-flex items-center justify-center rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loadingContent ? "Running content agent..." : "Simulate Run"}
+              {loadingContent ? "Running..." : "Simulate Run"}
             </button>
+
+            {loadingContent && (
+              <div className="mt-6 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 p-4">
+                <p className="animate-pulse text-sm text-cyan-300">{CONTENT_PHASES[contentPhase]}</p>
+              </div>
+            )}
 
             {contentError ? (
               <div className="mt-6 rounded-3xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
@@ -121,9 +163,12 @@ export default function AgenticProjects() {
             ) : null}
 
             {contentOutput ? (
-              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/90 p-5">
-                <p className="text-sm uppercase tracking-[0.28em] text-slate-500">AI Output</p>
-                <pre className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-100">{contentOutput}</pre>
+              <div className="mt-6 rounded-3xl border border-cyan-500/30 bg-slate-950/90 p-5 font-mono text-xs">
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-cyan-400"></div>
+                  <p className="uppercase tracking-wider text-cyan-400">AI Output Terminal</p>
+                </div>
+                <pre className="whitespace-pre-wrap leading-relaxed text-slate-200">{contentOutput}</pre>
               </div>
             ) : null}
           </section>
@@ -154,8 +199,14 @@ export default function AgenticProjects() {
               disabled={loadingLead}
               className="mt-6 inline-flex items-center justify-center rounded-full bg-violet-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loadingLead ? "Running lead researcher..." : "Simulate Run"}
+              {loadingLead ? "Running..." : "Simulate Run"}
             </button>
+
+            {loadingLead && (
+              <div className="mt-6 rounded-3xl border border-violet-500/30 bg-violet-500/10 p-4">
+                <p className="animate-pulse text-sm text-violet-300">{LEAD_PHASES[leadPhase]}</p>
+              </div>
+            )}
 
             {leadError ? (
               <div className="mt-6 rounded-3xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
@@ -164,9 +215,12 @@ export default function AgenticProjects() {
             ) : null}
 
             {leadOutput ? (
-              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/90 p-5">
-                <p className="text-sm uppercase tracking-[0.28em] text-slate-500">AI Output</p>
-                <pre className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-100">{leadOutput}</pre>
+              <div className="mt-6 rounded-3xl border border-violet-500/30 bg-slate-950/90 p-5 font-mono text-xs">
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-violet-400"></div>
+                  <p className="uppercase tracking-wider text-violet-400">AI Output Terminal</p>
+                </div>
+                <pre className="whitespace-pre-wrap leading-relaxed text-slate-200">{leadOutput}</pre>
               </div>
             ) : null}
           </section>
@@ -175,3 +229,4 @@ export default function AgenticProjects() {
     </main>
   );
 }
+

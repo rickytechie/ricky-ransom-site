@@ -28,25 +28,20 @@ class LeadRequest(BaseModel):
     target_market: str
 
 
-class AgentResponse(BaseModel):
-    success: bool
-    result: str
-
-
-@app.post("/api/run-content-agent", response_model=AgentResponse)
+@app.post("/api/run-content-agent")
 async def run_content_agent(request: ContentRequest):
     try:
         result = run_content_generator(request.company_description)
-        return AgentResponse(success=True, result=result)
+        return {"status": "success", "data": result}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@app.post("/api/run-lead-agent", response_model=AgentResponse)
+@app.post("/api/run-lead-agent")
 async def run_lead_agent(request: LeadRequest):
     try:
         result = run_lead_research(request.target_market)
-        return AgentResponse(success=True, result=result)
+        return {"status": "success", "data": result}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -55,3 +50,4 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
