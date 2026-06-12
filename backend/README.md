@@ -1,35 +1,42 @@
 # Backend Setup
 
-This directory contains a Python backend for CrewAI + Groq integration.
+This directory contains the dual-agent Python backend for CrewAI + Groq.
+
+## What this backend exposes
+
+- `POST /api/run-content-agent`
+  - Payload: `{ "company_description": "..." }`
+  - Returns: three AI-generated LinkedIn post hooks.
+- `POST /api/run-lead-agent`
+  - Payload: `{ "target_market": "..." }`
+  - Returns: three structured B2B profile recommendations.
 
 ## Setup
 
 1. Open a terminal in the project root.
-2. Run:
+2. Navigate to the backend folder:
    ```bash
    cd backend
+   ```
+3. Create or activate a virtual environment and install dependencies:
+   ```bash
    chmod +x setup.sh
    ./setup.sh
    ```
-3. Open `backend/.env` and paste your real `GROQ_API_KEY`.
+4. Open `backend/.env` and paste your real `GROQ_API_KEY`.
 
-## Run the server
+## Run the backend server
 
 ```bash
 source backend/venv/bin/activate
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-## API endpoint
+## Local frontend integration
 
-- `POST /api/run-agent`
-- JSON body:
-  ```json
-  {
-    "company_description": "Your business description here"
-  }
-  ```
+Your frontend page should POST to these local endpoints:
 
-## Response
+- `http://localhost:8000/api/run-content-agent`
+- `http://localhost:8000/api/run-lead-agent`
 
-The endpoint returns a JSON object with the raw agent output and extracted hooks.
+Make sure the backend is running before testing the frontend.

@@ -2,11 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from agents import run_content_generator
+from agents import run_content_generator, run_lead_research
 
 app = FastAPI(
-    title="CrewAI Groq Backend",
-    description="Backend API for running a CrewAI Social Media Strategist agent with Groq.",
+    title="CrewAI + Groq Agentic Backend",
+    description="FastAPI backend exposing two CrewAI/Groq autonomous workflows for content and lead research.",
 )
 
 allowed_origins = [
@@ -25,35 +25,33 @@ app.add_middleware(
 )
 
 
-class RunAgentRequest(BaseModel):
+class ContentRequest(BaseModel):
     company_description: str
 
 
-class RunAgentResponse(BaseModel):
+class LeadRequest(BaseModel):
+    target_market: str
+
+
+class AgentResponse(BaseModel):
     success: bool
     result: str
-    hooks: list[str]
 
 
-def _extract_hooks(raw_output: str) -> list[str]:
-    lines = [line.strip() for line in raw_output.splitlines() if line.strip()]
-    hooks = []
-    for line in lines:
-        if line[0].isdigit() and line[1] in ".)":
-            hooks.append(line[2:].strip())
-        elif line.startswith("-") or line.startswith("*"):
-            hooks.append(line[1:].strip())
-        else:
-            hooks.append(line)
-    return hooks[:3]
-
-
-@app.post("/api/run-agent", response_model=RunAgentResponse)
-async def run_agent(request: RunAgentRequest):
+@app.post("/api/run-content-agent", response_model=AgentResponse)
+async def run_content_agent(request: ContentRequest):
     try:
-        raw_result = run_content_generator(request.company_description)
-        hooks = _extract_hooks(raw_result)
-        return RunAgentResponse(success=True, result=raw_result, hooks=hooks)
+        result = run_content_generator(request.company_description)
+        return AgentResponse(success=True, result=result)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.post("/api/run-lead-agent", response_model=AgentResponse)
+async def run_lead_agent(request: LeadRequest):
+    try:
+        result = run_lead_research(request.target_market)
+        return AgentResponse(success=True, result=result)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 

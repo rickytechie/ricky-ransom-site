@@ -216,6 +216,7 @@ export default function Home() {
             <a href="/" className="transition hover:text-violet-300">PORTFOLIO LOBBY</a>
             <a href="#services" className="transition hover:text-violet-300">Services</a>
             <a href="#projects" className="transition hover:text-violet-300">PROJECTS</a>
+            <a href="/agentic-projects" className="transition hover:text-violet-300">AGENTIC PROJECTS</a>
             <a href="/music" className="transition hover:text-violet-300">MUSIC</a>
             <a href="#contact" className="transition hover:text-violet-300">Contact</a>
           </nav>
