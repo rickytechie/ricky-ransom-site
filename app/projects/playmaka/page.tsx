@@ -166,6 +166,51 @@ export default function PlaymakaPage() {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  const [companyDescription, setCompanyDescription] = useState<string>("");
+  const [agentResult, setAgentResult] = useState<string>("");
+  const [agentHooks, setAgentHooks] = useState<string[]>([]);
+  const [generating, setGenerating] = useState(false);
+  const [agentError, setAgentError] = useState<string | null>(null);
+
+  const handleGenerate = async () => {
+    if (!companyDescription.trim()) {
+      setAgentError("Please enter a business description first.");
+      return;
+    }
+
+    setGenerating(true);
+    setAgentError(null);
+    setAgentResult("");
+    setAgentHooks([]);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/run-agent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          company_description: companyDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Backend error: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      setAgentResult(data.result ?? "");
+      setAgentHooks(Array.isArray(data.hooks) ? data.hooks : []);
+    } catch (err) {
+      setAgentError(
+        err instanceof Error ? err.message : "Unable to reach the backend agent."
+      );
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   // Fetch real-time sports data
   useEffect(() => {
     const fetchSportsData = async () => {
@@ -399,6 +444,70 @@ export default function PlaymakaPage() {
                 </div>
               </div>
             )}
+
+            <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                    AI Content Generator
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    Generate LinkedIn hooks from a business description
+                  </p>
+                </div>
+                <Sparkles className="h-5 w-5 text-cyan-300" />
+              </div>
+              <div className="mt-4 space-y-4">
+                <textarea
+                  value={companyDescription}
+                  onChange={(event) => setCompanyDescription(event.target.value)}
+                  rows={5}
+                  placeholder="Describe your business, product, or campaign..."
+                  className="w-full rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-300/10"
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="inline-flex items-center justify-center rounded-3xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {generating ? "Generating..." : "Generate Hooks"}
+                </button>
+
+                {agentError && (
+                  <div className="rounded-3xl border border-rose-400/20 bg-rose-400/5 p-4 text-sm text-rose-200">
+                    {agentError}
+                  </div>
+                )}
+
+                {agentHooks.length > 0 && (
+                  <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-sm text-slate-200">
+                    <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                      Generated Hooks
+                    </p>
+                    <div className="mt-3 space-y-3">
+                      {agentHooks.map((hook, index) => (
+                        <div key={index} className="rounded-3xl border border-white/10 bg-slate-900/80 p-3">
+                          <p className="font-semibold text-white">Hook {index + 1}</p>
+                          <p className="mt-2 text-slate-300">{hook}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {agentResult && agentHooks.length === 0 && (
+                  <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-sm text-slate-200">
+                    <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                      Raw Agent Output
+                    </p>
+                    <p className="mt-3 whitespace-pre-wrap text-slate-300">
+                      {agentResult}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </aside>
 
           <section className="space-y-6">
