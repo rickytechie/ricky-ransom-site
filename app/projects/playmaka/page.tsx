@@ -29,7 +29,7 @@ type SportsEvent = {
       key: string;
       outcomes: Array<{
         name: string;
-        price: number;
+        price: number | string;
       }>;
     }>;
   }>;
@@ -44,7 +44,22 @@ type Matchup = {
   tier: "Elite" | "Premium" | "High Value";
   odds: string;
   market: string;
+  moneyline: string;
+  spread: string;
+  pickWinner: string;
   commenceTime: string;
+};
+
+type BestBets = {
+  moneyline: string;
+  pickWinner: string;
+  spread: string;
+};
+
+const defaultBestBets: BestBets = {
+  moneyline: "Waiting for fresh moneyline data",
+  pickWinner: "Waiting for fresh pick winner data",
+  spread: "Waiting for fresh spread data",
 };
 
 const sidebarLinks = [
@@ -61,39 +76,85 @@ const tierStyles = {
 };
 
 function calculateConfidence(odds: number): string {
-  // Convert decimal odds to implied probability
   const probability = (1 / odds) * 100;
   if (probability >= 70) return "Elite";
   if (probability >= 55) return "Premium";
   return "High Value";
 }
 
+function formatPrice(price: number | string | undefined) {
+  const parsed = Number(price);
+  if (Number.isFinite(parsed)) {
+    return parsed.toFixed(2);
+  }
+  return typeof price === "string" ? price : "-";
+}
+
 function extractOdds(event: SportsEvent): string {
   if (!event.bookmakers || event.bookmakers.length === 0) return "-";
   const bookmaker = event.bookmakers[0];
-  if (!bookmaker.markets || bookmaker.markets.length === 0) return "-";
-  const market = bookmaker.markets[0];
-  if (!market.outcomes || market.outcomes.length === 0) return "-";
-  return market.outcomes[0].price?.toFixed(2) || "-";
+  const moneylineMarket = bookmaker.markets?.find(
+    (market) => market.key === "h2h" || market.key === "moneyline"
+  );
+  if (moneylineMarket?.outcomes?.length) {
+    return formatPrice(moneylineMarket.outcomes[0].price);
+  }
+
+  const spreadMarket = bookmaker.markets?.find((market) => market.key === "spreads");
+  if (spreadMarket?.outcomes?.length) {
+    return formatPrice(spreadMarket.outcomes[0].price);
+  }
+
+  const defaultMarket = bookmaker.markets?.[0];
+  return defaultMarket?.outcomes?.[0]
+    ? formatPrice(defaultMarket.outcomes[0].price)
+    : "-";
 }
 
 function extractBestPlay(event: SportsEvent): string {
-  const odds = extractOdds(event);
   if (!event.bookmakers || event.bookmakers.length === 0) {
     return `Monitor line: ${event.home_team} vs ${event.away_team}`;
   }
+
   const bookmaker = event.bookmakers[0];
-  if (!bookmaker.markets || bookmaker.markets.length === 0)
-    return `Value spot detected`;
-
-  const market = bookmaker.markets[0];
-  const marketLabel = market.key === "spreads" ? "Spread" : "Total";
-  const outcome = market.outcomes?.[0];
-
-  if (outcome) {
-    return `${outcome.name} @ ${outcome.price?.toFixed(2)}`;
+  const moneylineMarket = bookmaker.markets?.find(
+    (market) => market.key === "h2h" || market.key === "moneyline"
+  );
+  if (moneylineMarket?.outcomes?.length) {
+    const outcome = moneylineMarket.outcomes[0];
+    return `${outcome.name} @ ${formatPrice(outcome.price)}`;
   }
-  return marketLabel;
+
+  const spreadMarket = bookmaker.markets?.find((market) => market.key === "spreads");
+  if (spreadMarket?.outcomes?.length) {
+    const outcome = spreadMarket.outcomes[0];
+    return `${outcome.name} @ ${formatPrice(outcome.price)}`;
+  }
+
+  const defaultMarket = bookmaker.markets?.[0];
+  const defaultOutcome = defaultMarket?.outcomes?.[0];
+  return defaultOutcome
+    ? `${defaultOutcome.name} @ ${formatPrice(defaultOutcome.price)}`
+    : "Value spot detected";
+}
+
+function extractMoneyline(event: SportsEvent): string {
+  if (!event.bookmakers || event.bookmakers.length === 0) return "No moneyline available";
+  const bookmaker = event.bookmakers[0];
+  const moneylineMarket = bookmaker.markets?.find(
+    (market) => market.key === "h2h" || market.key === "moneyline"
+  );
+  if (!moneylineMarket?.outcomes?.length) return "No moneyline available";
+  const outcome = moneylineMarket.outcomes[0];
+  return `${outcome.name} @ ${formatPrice(outcome.price)}`;
+}
+
+function extractSpread(event: SportsEvent): string {
+  if (!event.bookmakers || event.bookmakers.length === 0) return "No spread available";
+  const bookmaker = event.bookmakers[0];
+  const spreadMarket = bookmaker.markets?.find((market) => market.key === "spreads");
+  const outcome = spreadMarket?.outcomes?.[0];
+  return outcome ? `${outcome.name} @ ${formatPrice(outcome.price)}` : "No spread available";
 }
 
 export default function PlaymakaPage() {
@@ -101,6 +162,7 @@ export default function PlaymakaPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bestBets, setBestBets] = useState<BestBets>(defaultBestBets);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(true);
 
@@ -112,11 +174,11 @@ export default function PlaymakaPage() {
         const response = await fetch("/api/odds");
 
         if (!response.ok) {
-          throw new Error("Failed to fetch odds data");
+          throw new Error("Failed to fetch live odds data");
         }
 
         const data = await response.json();
-        const events = data.events || [];
+        const events = data.combinedEvents || data.events || [];
 
         // Transform API events to matchup format
         const transformedMatchups: Matchup[] = events
@@ -137,6 +199,9 @@ export default function PlaymakaPage() {
               confidence: `${Math.round((1 / oddsValue) * 100)}%`,
               tier,
               odds: odds,
+              moneyline: extractMoneyline(event),
+              spread: extractSpread(event),
+              pickWinner: extractMoneyline(event),
               market: event.bookmakers?.[0]?.markets?.[0]?.key || "spreads",
               commenceTime: event.commence_time,
             };
@@ -146,6 +211,16 @@ export default function PlaymakaPage() {
         if (transformedMatchups.length > 0 && !selectedId) {
           setSelectedId(transformedMatchups[0].id);
         }
+
+        setBestBets({
+          moneyline:
+            data.bestBets?.moneyline || "No moneyline recommendation available",
+          pickWinner:
+            data.bestBets?.pickWinner || "No pick winner recommendation available",
+          spread:
+            data.bestBets?.spread || "No spread recommendation available",
+        });
+
         setError(null);
         setLastUpdate(new Date());
       } catch (err) {
@@ -318,9 +393,9 @@ export default function PlaymakaPage() {
                 <div className="mt-4 space-y-3 text-sm text-slate-300">
                   <p>{selectedMatchup.teams}</p>
                   <p>{selectedMatchup.play}</p>
-                  <p className="text-slate-400">
-                    Odds: {selectedMatchup.odds}
-                  </p>
+                  <p className="text-slate-400">Moneyline: {selectedMatchup.moneyline}</p>
+                  <p className="text-slate-400">Spread: {selectedMatchup.spread}</p>
+                  <p className="text-slate-400">Pick Winner: {selectedMatchup.pickWinner}</p>
                 </div>
               </div>
             )}
@@ -357,6 +432,40 @@ export default function PlaymakaPage() {
                     <p className="mt-3 text-sm leading-6 text-slate-400">
                       Market edge detected from odds aggregation
                     </p>
+                  </article>
+                  <article className="rounded-[2rem] border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-slate-900/20">
+                    <div className="flex items-center gap-3 text-sky-300">
+                      <Shield className="h-5 w-5" />
+                      <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+                        Best Bets
+                      </p>
+                    </div>
+                    <div className="mt-5 space-y-4 text-sm text-slate-200">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                          Moneyline
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-white">
+                          {bestBets.moneyline}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                          Pick Winner
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-white">
+                          {bestBets.pickWinner}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
+                          Spread
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-white">
+                          {bestBets.spread}
+                        </p>
+                      </div>
+                    </div>
                   </article>
                 </>
               )}
