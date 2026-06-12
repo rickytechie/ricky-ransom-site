@@ -9,9 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
+if not GROQ_API_KEY or GROQ_API_KEY.strip() == "your_key_here":
     raise EnvironmentError(
-        "GROQ_API_KEY is missing. Please add it to backend/.env"
+        "GROQ_API_KEY is missing or still set to the placeholder value. "
+        "Please replace backend/.env GROQ_API_KEY with your real Groq API key."
     )
 
 
