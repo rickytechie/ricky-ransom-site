@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 
-const CONTENT_ENDPOINT = "http://127.0.0.1:8000/api/run-content-agent";
-const LEAD_ENDPOINT = "http://127.0.0.1:8000/api/run-lead-agent";
+const CONTENT_ENDPOINT = "http://localhost:8000/api/run-content-agent";
+const LEAD_ENDPOINT = "http://localhost:8000/api/run-lead-agent";
+
+
 
 const CONTENT_PHASES = [
   "🤖 Initializing Content Strategy Agent...",

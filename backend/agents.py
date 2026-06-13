@@ -1,22 +1,55 @@
-from pathlib import Path
 import os
-from dotenv import load_dotenv
+import json
+from typing import Any, Dict
 
-from crewai import Agent, Task, Crew
-from langchain_groq import ChatGroq
-
-BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(BASE_DIR / ".env")
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "your_key_here")
-if not GROQ_API_KEY or GROQ_API_KEY.strip() in ("", "your_key_here"):
-    # Allow placeholder for testing; production requires real key
-    print("⚠️  WARNING: GROQ_API_KEY not set. Using placeholder for testing only.")
-    print("   Add your real key to backend/.env: GROQ_API_KEY=your_actual_key")
+from crewai import Agent, Crew
 
 
-def _build_content_prompt(company_description: str) -> str:
-    return (
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+os.environ["GROQ_API_KEY"] = GROQ_API_KEY
+
+
+def _base_agent_common(**overrides: Any) -> Agent:
+    """Create an Agent with explicit role/goal/backstory and native string model id."""
+
+    return Agent(
+        llm="groq/llama3-8b-8192",
+        verbose=True,
+        **overrides,
+    )
+
+
+async def _run_crew_single_agent(agent: Agent, *, inputs: Dict[str, Any]) -> str:
+    """Non-blocking crew worker using CrewAI async kickoff."""
+
+    # CrewAI versions commonly expect at least one task. If your CrewAI build
+    # requires tasks, you can adjust this to include a Task.
+    crew = Crew(agents=[agent], tasks=[], verbose=True)
+
+    result = await crew.kickoff_async(inputs=inputs)
+
+    raw = getattr(result, "raw", result)
+    if isinstance(raw, (dict, list)):
+        return json.dumps(raw, ensure_ascii=False)
+    return str(raw)
+
+
+async def run_content_generator(company_description: str) -> str:
+    """Run the Social Media Strategist workflow and return exactly 3 LinkedIn hooks."""
+
+    agent = _base_agent_common(
+        role="Social Media Strategist",
+        goal=(
+            "Generate high-converting LinkedIn post hooks that drive engagement, clicks, "
+            "and B2B lead conversion."
+        ),
+        backstory=(
+            "You specialize in high-performing LinkedIn messaging for B2B SaaS and "
+            "enterprise teams. You write concise hooks that spark curiosity and action."
+        ),
+    )
+
+    prompt = (
         "You are a Social Media Strategist specializing in high-converting LinkedIn content for LinkedIn feeds. "
         "Given the business description below, generate exactly 3 custom LinkedIn post hooks that are bold, concise, "
         "and designed to drive engagement, clicks, and B2B lead conversion. "
@@ -28,11 +61,28 @@ def _build_content_prompt(company_description: str) -> str:
         "3. Hook three"
     )
 
+    return await _run_crew_single_agent(agent, inputs={"prompt": prompt})
 
-def _build_lead_prompt(target_market: str) -> str:
-    return (
+
+async def run_lead_research(target_market: str) -> str:
+    """Run lead research and return structured buyer segments and outreach angles."""
+
+    agent = _base_agent_common(
+        role="Autonomous Lead Researcher",
+        goal=(
+            "Identify ideal buyer profile segments and explain their technology bottlenecks "
+            "and the best outreach angle."
+        ),
+        backstory=(
+            "You research B2B markets for SaaS and enterprise sales teams. "
+            "You produce structured, actionable insights with clear outreach hooks."
+        ),
+    )
+
+    prompt = (
         "You are an Autonomous Lead Researcher for B2B SaaS and enterprise sales teams. "
-        "Given the target market below, identify 3 ideal buyer profile segments and explain each profile's likely technology bottlenecks and the best outreach angle. "
+        "Given the target market below, identify 3 ideal buyer profile segments and explain each profile's likely "
+        "technology bottlenecks and the best outreach angle. "
         "Format the response as a numbered list with each profile including:\n"
         "- Profile name / company type\n"
         "- Key role or decision-maker\n"
@@ -46,46 +96,5 @@ def _build_lead_prompt(target_market: str) -> str:
         "   - Outreach angle:"
     )
 
-
-def _run_agent(prompt: str, variable_name: str, value: str) -> str:
-    # Model config/API keys belong ONLY in the LLM/Agent definitions.
-    groq_model = ChatGroq(api_key=GROQ_API_KEY, model="llama3-8b-8192")
-
-    agent = Agent(
-        name="Agentic Engine",
-        description="A dual-agent workflow using CrewAI and Groq for content ideation and B2B lead research.",
-        llm=groq_model,
-        instructions=prompt,
-    )
-
-    task = Task(
-        description=prompt,
-        expected_output="A plain text numbered list as requested by the prompt.",
-        agent=agent,
-    )
-
-    # Crew must receive ONLY agents, tasks, verbose=True (no config/api keys)
-    crew = Crew(
-        agents=[agent],
-        tasks=[task],
-        verbose=True,
-    )
-
-    crew_output = crew.kickoff(inputs={variable_name: value})
-
-    # Force clean serialization for FastAPI.
-    # CrewOutput is not JSON serializable; return a plain string.
-    return str(getattr(crew_output, "raw", crew_output))
-
-
-def run_content_generator(company_description: str) -> str:
-    """Run the Social Media Strategist workflow and return three LinkedIn hooks."""
-    prompt = _build_content_prompt(company_description)
-    return _run_agent(prompt, "company_description", company_description)
-
-
-def run_lead_research(target_market: str) -> str:
-    """Run the Autonomous Lead Researcher workflow and return three B2B profile recommendations."""
-    prompt = _build_lead_prompt(target_market)
-    return _run_agent(prompt, "target_market", target_market)
+    return await _run_crew_single_agent(agent, inputs={"prompt": prompt})
 

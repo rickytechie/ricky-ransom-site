@@ -184,7 +184,7 @@ export default function PlaymakaPage() {
     setAgentHooks([]);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/run-content-agent", {
+const response = await fetch("http://10.255.255.254:8000/api/run-content-agent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

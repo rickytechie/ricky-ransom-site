@@ -1,26 +1,33 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from __future__ import annotations
+
+from typing import Callable, List, Optional
+
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
 
 from agents import run_content_generator, run_lead_research
 
+
 app = FastAPI(
+
     title="CrewAI + Groq Agentic Backend",
     description="FastAPI backend exposing two CrewAI/Groq autonomous workflows for content and lead research.",
 )
 
-allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 class ContentRequest(BaseModel):
+
     company_description: str
 
 
@@ -31,19 +38,19 @@ class LeadRequest(BaseModel):
 @app.post("/api/run-content-agent")
 async def run_content_agent(request: ContentRequest):
     try:
-        result = run_content_generator(request.company_description)
+        result = await run_content_generator(request.company_description)
         return {"status": "success", "data": result}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail="Agent execution failed") from exc
 
 
 @app.post("/api/run-lead-agent")
 async def run_lead_agent(request: LeadRequest):
     try:
-        result = run_lead_research(request.target_market)
+        result = await run_lead_research(request.target_market)
         return {"status": "success", "data": result}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail="Agent execution failed") from exc
 
 
 if __name__ == "__main__":

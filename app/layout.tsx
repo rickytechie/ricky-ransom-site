@@ -35,7 +35,7 @@ export default function RootLayout({
                 <Link href="/" className="text-white/80 hover:text-white transition">
                   Home
                 </Link>
-                <Link href="/portfolio" className="text-white/80 hover:text-white transition">
+                <Link href="/projects" className="text-white/80 hover:text-white transition">
                   Portfolio
                 </Link>
                 <Link href="/agentic-projects" className="text-white/80 hover:text-white transition">
