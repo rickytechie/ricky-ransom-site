@@ -35,12 +35,19 @@ export default function RootLayout({
                 <Link href="/" className="text-white/80 hover:text-white transition">
                   Home
                 </Link>
-                <Link href="/projects" className="text-white/80 hover:text-white transition">
+                <Link href="/#projects" className="text-white/80 hover:text-white transition">
                   Portfolio
+                </Link>
+                <Link
+                  href="/portfolio/web-dev-projects"
+                  className="text-white/80 hover:text-white transition"
+                >
+                  Web Dev
                 </Link>
                 <Link href="/agentic-projects" className="text-white/80 hover:text-white transition">
                   Agentic Projects
                 </Link>
+
               </nav>
             </div>
           </div>
