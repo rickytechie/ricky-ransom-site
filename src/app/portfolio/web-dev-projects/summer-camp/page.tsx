@@ -1,338 +1,171 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, CalendarDays, Leaf, MessageSquare, ShieldCheck, Sparkles, Trees } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-const SCHEDULE = [
-  {
-    block: "Morning",
-    window: "9:00–12:00",
-    items: ["Cabin check-in + warm badge starter", "Trail Adventures · guided observation", "Hands-on nature lab (station rotation)"],
-  },
-  {
-    block: "Late Afternoon",
-    window: "1:30–4:30",
-    items: ["TrailCraft badge quests", "Craft bench + photo log", "Campfire rehearsal + story circles"],
-  },
-  {
-    block: "Evening",
-    window: "5:30–7:45",
-    items: ["Campfire Nights · counselor Q&A", "Signature outdoor games", "Reflection journal + soft landing routine"],
-  },
-];
-
-const ACTIVITIES = [
-  { title: "Lakefront Arts", body: "Sunrise sketch sessions + cabin murals. Calm pacing, premium craft materials." },
-  { title: "Trail Adventures", body: "Nature walks, badge hunts, and photo logs with counselor-guided discovery." },
-  { title: "Campfire Nights", body: "Stories, songs, and counselor Q&A—designed for confidence and belonging." },
-  { title: "Harbor Lab", body: "Outdoor science stations with safe measurement rituals and observation journals." },
-  { title: "Cabin Craft Bench", body: "Hands-on crafts with a small prototype kit and a counselor-ready checklist." },
-  { title: "Night Sky Stories", body: "Quiet astronomy storytelling—soft lights, gentle engagement, and bedtime flow." },
-];
-
-type RegistrationHook = {
-  label: string;
-  value: string;
-  hint: string;
-};
-
-const REG_HOOKS: RegistrationHook[] = [
-  {
-    label: "Age band",
-    value: "9–11",
-    hint: "Used to route to the correct counselor pairing and pace.",
-  },
-  {
-    label: "Outdoor interest",
-    value: "Nature + badges",
-    hint: "Optimizes schedule blocks and activity station routing.",
-  },
-  {
-    label: "Preferred rhythm",
-    value: "Mornings + late afternoons",
-    hint: "Coordinates daily cadence with parent scheduling blocks.",
-  },
-];
-
-function sandLine() {
-  return "sand-line rounded-full border border-[#D1D1C7]/40";
-}
-
-function SoftTimeline() {
+function LuminousNavbar({
+  brand,
+  menu,
+  cta,
+}: {
+  brand: string;
+  menu: string[];
+  cta: { label: string; href: string };
+}) {
   return (
-    <div className="grid gap-5 md:grid-cols-3">
-      {SCHEDULE.map((s, idx) => (
-        <motion.div
-          key={s.block}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.35, delay: idx * 0.04 }}
-          className="rounded-[2rem] border border-emerald-900/15 bg-white/50 p-6"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/60">{s.block}</div>
-              <div className="mt-2 font-playfair text-2xl text-zinc-900">{s.window}</div>
-            </div>
-            <div className="h-11 w-11 rounded-2xl border border-emerald-900/15 bg-moss-900/10 grid place-items-center">
-              <CalendarDays className="h-5 w-5 text-emerald-800" />
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {s.items.map((it) => (
-              <div key={it} className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-emerald-700" />
-                <p className="font-inter text-sm leading-6 text-zinc-900/70">{it}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function ActivityGrid() {
-  return (
-    <div className="mt-10 grid gap-5 md:grid-cols-3">
-      {ACTIVITIES.map((a) => (
-        <motion.div
-          key={a.title}
-          whileHover={{ y: -4 }}
-          transition={{ duration: 0.25 }}
-          className="rounded-[2rem] border border-emerald-900/15 bg-white/45 p-6"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/60">Activity</div>
-              <h3 className="mt-2 font-playfair text-2xl text-zinc-900">{a.title}</h3>
-            </div>
-            <div className="rounded-full border border-emerald-900/20 bg-moss-900/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.28em] text-emerald-900/70">
-              premium
-            </div>
-          </div>
-          <p className="mt-4 font-inter text-sm leading-6 text-zinc-900/70">{a.body}</p>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function RegistrationPanel({ onOpenAssistant }: { onOpenAssistant: () => void }) {
-  return (
-    <div className="mt-10 rounded-[2.5rem] border border-emerald-900/20 bg-white/45 p-6 sm:p-8">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/20 bg-moss-900/10 px-4 py-2">
-            <Sparkles className="text-emerald-800" size={16} />
-            <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-emerald-900/70">Registration Pipeline</span>
-          </div>
-          <h2 className="mt-4 font-playfair text-4xl text-zinc-900 leading-[1.05]">Convert parent criteria into the right track.</h2>
-          <p className="mt-4 font-inter text-sm leading-7 text-zinc-900/70">
-            This portal provides a warm overview of the schedule and activity matrix. For real-time recommendations, parents
-            open the AI Camp Placement Assistant.
-          </p>
+    <header className="fixed left-0 top-0 z-50 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+        <div className="text-[12px] font-mono uppercase tracking-[0.38em] text-white/90">
+          {brand}
         </div>
 
-        <div className="w-full max-w-md rounded-[2rem] border border-emerald-900/20 bg-moss-900/10 p-6">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-emerald-800" />
-            <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/65">Safety-forward UX</div>
-          </div>
-          <div className="mt-2 text-sm text-zinc-900/70">A gentle checklist flow that feels calm, not clinical.</div>
-
-          <div className="mt-6 grid gap-3">
-            {REG_HOOKS.map((h) => (
-              <div key={h.label} className="rounded-[1.75rem] border border-emerald-900/15 bg-white/50 p-4">
-                <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/60">{h.label}</div>
-                <div className="mt-2 font-inter font-semibold text-zinc-900">{h.value}</div>
-                <div className="mt-2 text-xs text-zinc-900/65">{h.hint}</div>
-              </div>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={onOpenAssistant}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-emerald-800 px-6 py-3 text-sm font-semibold text-cream hover:opacity-95 transition"
-          >
-            <MessageSquare size={16} />
-            Open AI Placement Assistant
-          </button>
+        <nav className="flex items-center gap-7">
+          {menu.map((m) => (
+            <Link
+              key={m}
+              href="#"
+              className="text-[12px] font-mono uppercase tracking-[0.28em] text-white/70 hover:text-white transition"
+              aria-label={m}
+            >
+              {m}
+            </Link>
+          ))}
 
           <Link
-            href="/portfolio/web-dev-projects/summer-camp/assistant"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-900/20 bg-white/50 px-6 py-3 text-sm font-semibold text-emerald-900/80 hover:bg-white/70 transition"
+            href={cta.href}
+            className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-white px-5 py-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-black hover:opacity-95 transition"
           >
-            Direct Route
-            <ArrowUpRight size={16} />
+            {cta.label}
           </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+function SandLines() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div className="absolute left-0 top-0 h-full w-[1px] bg-white/5" />
+      <div className="absolute right-0 top-0 h-full w-[1px] bg-white/5" />
+      <div className="absolute left-0 top-0 h-[1px] w-full bg-white/5" />
+      <div className="absolute bottom-0 left-0 h-[1px] w-full bg-white/5" />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(209,209,199,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(209,209,199,0.10) 1px, transparent 1px)",
+          backgroundSize: "48px 48px, 48px 48px",
+          maskImage: "radial-gradient(circle at 25% 20%, black 0%, transparent 60%)",
+        }}
+      />
+    </div>
+  );
+}
+
+function HeroBackdrop() {
+  return (
+    <div className="absolute inset-0">
+      <div className="h-full w-full bg-gradient-to-b from-[#060b0c] via-[#030405] to-black" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.20),transparent_48%),radial-gradient(circle_at_70%_25%,rgba(16,185,129,0.16),transparent_52%),radial-gradient(circle_at_50%_88%,rgba(245,158,11,0.18),transparent_60%)]" />
+
+      <div aria-hidden className="absolute bottom-0 left-0 right-0 h-[52%]">
+        <div className="absolute bottom-0 left-0 h-full w-[55%] bg-[linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,0.95))]" />
+        <div className="absolute bottom-0 left-0 h-[70%] w-full opacity-90">
+          <div className="absolute bottom-0 left-[10%] h-[70%] w-[80px] rounded-full bg-white/6 blur-[0.3px]" />
+          <div className="absolute bottom-0 left-[22%] h-[85%] w-[70px] rounded-full bg-white/5" />
+          <div className="absolute bottom-0 left-[37%] h-[78%] w-[90px] rounded-full bg-white/4" />
+          <div className="absolute bottom-0 left-[58%] h-[88%] w-[80px] rounded-full bg-white/5" />
+          <div className="absolute bottom-0 left-[72%] h-[74%] w-[95px] rounded-full bg-white/4" />
+        </div>
+      </div>
+
+      <div className="absolute bottom-0 left-1/2 h-[520px] w-[760px] -translate-x-1/2 rounded-[340px] bg-[radial-gradient(circle_at_50%_60%,rgba(245,158,11,0.20)_0%,rgba(245,158,11,0.08)_35%,rgba(245,158,11,0.00)_70%)] blur-2xl" />
+      <div className="absolute bottom-[-30px] left-1/2 h-[240px] w-[360px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.18)_0%,rgba(251,191,36,0.07)_35%,rgba(251,191,36,0.00)_70%)] blur-xl" />
+
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-60 mix-blend-overlay"
+        style={{
+          background:
+            "url(/file.svg) repeat",
+          filter: "contrast(120%)",
+        }}
+      />
+    </div>
+  );
+}
+
+function HeroContent({
+  heading,
+  body,
+  primary,
+  secondary,
+}: {
+  heading: string;
+  body: string;
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+}) {
+  return (
+    <div className="relative mx-auto w-full max-w-7xl px-4 pt-[84px] sm:px-6">
+      <div className="grid min-h-screen place-items-center pb-14">
+        <div className="w-full">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2">
+              <span className="text-[10px] font-mono uppercase tracking-[0.38em] text-white/65">
+                DUSK FOREST CORRIDOR
+              </span>
+            </div>
+
+            <h1 className="mt-5 font-playfair text-6xl leading-[0.98] text-[#FDFBF7]">{heading}</h1>
+
+            <p className="mt-5 max-w-xl font-inter text-sm leading-7 text-[#FDFBF7]/75">{body}</p>
+
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Link
+                href={primary.href}
+                className="group inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-black hover:opacity-95 transition"
+              >
+                {primary.label}
+                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-0.5" size={16} />
+              </Link>
+              <Link
+                href={secondary.href}
+                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-[#FDFBF7] hover:bg-white/10 transition"
+              >
+                {secondary.label}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default function SummerCampPortalPage() {
-  const [openAssistant, setOpenAssistant] = useState(false);
-
-  const assistantHref = "/portfolio/web-dev-projects/summer-camp/assistant";
-
+export default function SummerCampLanding() {
   return (
-    <main className="min-h-screen bg-[#FDFBF7] text-zinc-950">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute left-[-220px] top-[-160px] h-[520px] w-[520px] rounded-full bg-emerald-900/10 blur-3xl" />
-        <div className="absolute right-[-260px] top-[240px] h-[620px] w-[620px] rounded-full bg-emerald-800/10 blur-3xl" />
-        <div className="absolute left-1/2 top-[520px] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-900/7 blur-3xl" />
-      </div>
+    <div className="min-h-screen relative bg-black text-white">
+      <LuminousNavbar
+        brand="CAMP EVERWOOD"
+        menu={["PROGRAMS", "PLACEMENT", "ENROLL"]}
+        cta={{ label: "ENROLL", href: "/portfolio/web-dev-projects/summer-camp/assistant" }}
+      />
 
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-10 sm:px-8">
-        <div className="flex flex-col gap-6">
-          <header className="rounded-[2.5rem] border border-emerald-900/20 bg-white/45 p-6 sm:p-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/20 bg-moss-900/10 px-4 py-2">
-                  <Trees className="text-emerald-800" size={16} />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-emerald-900/70">Camp Everwood</span>
-                </div>
-
-                <h1 className="mt-4 font-playfair text-5xl leading-[1.02]">
-                  Organic summer systems with premium calm UX.
-                </h1>
-
-                <p className="mt-4 font-inter text-sm leading-7 text-zinc-900/70">
-                  A warm, high-fidelity youth summer system portal. Includes schedule timelines, activity matrices, and
-                  a registration pipeline hook into an AI Camp Placement Assistant.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {[
-                    "Schedule timeline",
-                    "Activity grid",
-                    "Registration routing",
-                    "AI counselor assistant",
-                  ].map((t) => (
-                    <span key={t} className={"sand-line rounded-full border border-emerald-900/20 bg-moss-900/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.25em] text-emerald-900/70"}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="w-full max-w-sm">
-                <div className="rounded-[2rem] border border-emerald-900/20 bg-moss-900/10 p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-2xl border border-emerald-900/20 bg-cream/70 grid place-items-center">
-                      <Leaf className="h-5 w-5 text-emerald-800" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/65">Portal state</div>
-                      <div className="mt-1 font-playfair text-2xl text-zinc-900">Ready to register</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-[1.75rem] border border-emerald-900/15 bg-white/50 p-4">
-                    <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/60">Conversion cue</div>
-                    <div className="mt-2 text-sm font-semibold text-zinc-900">Open assistant to recommend tracks.</div>
-                    <div className="mt-2 text-xs text-zinc-900/65">Instant mock recommendations based on criteria inputs.</div>
-                  </div>
-
-                  <Link
-                    href={assistantHref}
-                    className="mt-5 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-emerald-800 px-6 py-3 text-sm font-semibold text-cream hover:opacity-95 transition"
-                  >
-                    <MessageSquare size={16} />
-                    Open AI Placement Assistant
-                    <ArrowUpRight size={16} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          <SoftTimeline />
-
-          <ActivityGrid />
-
-          <RegistrationPanel onOpenAssistant={() => setOpenAssistant(true)} />
-
-          <AnimatePresence>
-            {openAssistant ? (
-              <motion.div
-                className="fixed inset-0 z-50"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <button
-                  type="button"
-                  aria-label="Close assistant modal"
-                  className="absolute inset-0 bg-black/30 backdrop-blur-[6px]"
-                  onClick={() => setOpenAssistant(false)}
-                />
-                <motion.aside
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ type: "spring", stiffness: 220, damping: 26 }}
-                  className="absolute right-0 top-0 h-full w-full max-w-md border-l border-emerald-900/20 bg-white/65 backdrop-blur-[18px] p-6"
-                >
-                  <div className="flex items-center justify-between gap-3 border-b border-emerald-900/15 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-11 w-11 rounded-2xl border border-emerald-900/20 bg-moss-900/10 grid place-items-center">
-                        <MessageSquare size={18} className="text-emerald-800" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/65">AI Camp Placement Assistant</div>
-                        <div className="mt-1 font-playfair text-2xl text-zinc-900">Recommendation session</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAssistant(false)}
-                      className="min-h-[40px] rounded-full border border-emerald-900/20 bg-cream/70 px-4 text-xs font-mono uppercase tracking-[0.28em] text-emerald-900/70 hover:bg-cream transition"
-                    >
-                      Close
-                    </button>
-                  </div>
-
-                  <div className="mt-5">
-                    <div className="rounded-[2rem] border border-emerald-900/20 bg-moss-900/10 p-5">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck size={16} className="text-emerald-800" />
-                        <div className="text-xs font-mono uppercase tracking-[0.35em] text-emerald-900/65">What to expect</div>
-                      </div>
-                      <div className="mt-2 text-sm text-zinc-900/70">
-                        Enter age, outdoor interests, and schedule blocks. The assistant returns specialized camp tracks.
-                      </div>
-                      <div className="mt-4 flex flex-col gap-3">
-                        <Link
-                          href="/portfolio/web-dev-projects/summer-camp/assistant"
-                          className="flex items-center justify-center gap-2 rounded-full bg-emerald-800 px-6 py-3 text-sm font-semibold text-cream hover:opacity-95 transition"
-                        >
-                          Launch Assistant
-                          <ArrowUpRight size={16} />
-                        </Link>
-                        <Link
-                          href="/portfolio/web-dev-projects/summer-camp"
-                          className="flex items-center justify-center gap-2 rounded-full border border-emerald-900/20 bg-cream/70 px-6 py-3 text-sm font-semibold text-emerald-900/80 hover:bg-cream transition"
-                        >
-                          Back to Portal
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </motion.aside>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
-      </div>
-    </main>
+      <section className="min-h-screen relative">
+        <HeroBackdrop />
+        <SandLines />
+        <HeroContent
+          heading="Camp Everwood"
+          body="An immersive, premium brand experience integrating rich natural landscapes with adaptive educational pathways and streamlined placement pipelines."
+          primary={{ label: "EXPLORE PROGRAMS", href: "/portfolio/web-dev-projects/summer-camp" }}
+          secondary={{ label: "TALK TO ASSISTANT", href: "/portfolio/web-dev-projects/summer-camp/assistant" }}
+        />
+      </section>
+    </div>
   );
 }
 

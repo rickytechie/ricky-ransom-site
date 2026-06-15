@@ -1,366 +1,266 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { useSearchParams } from "next/navigation";
-import { ArrowRight, Building2, Clock, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-type Estate = {
-  id: string;
-  name: string;
-  market: "Hamptons" | "NYC" | "Long Island";
-  neighborhood: string;
-  beds: number;
-  baths: number;
-  sqft: number;
-  priceFromM: number;
-  vibeTags: string[];
-};
-
-const MOCK_HERO: Estate[] = [
-  {
-    id: "luminous-dune-01",
-    name: "Luminous Dune Residence",
-    market: "Hamptons",
-    neighborhood: "Sagaponack Edge",
-    beds: 5,
-    baths: 4.5,
-    sqft: 6200,
-    priceFromM: 8.95,
-    vibeTags: ["ocean-facing", "sand-etched stone", "terrace drama"],
-  },
-  {
-    id: "atlantic-ink-02",
-    name: "Atlantic Ink Courtyard House",
-    market: "Long Island",
-    neighborhood: "Water Mill Quarter",
-    beds: 4,
-    baths: 3.5,
-    sqft: 4880,
-    priceFromM: 6.75,
-    vibeTags: ["courtyard hush", "charcoal tokens", "evening-ready"],
-  },
-  {
-    id: "oyster-shell-03",
-    name: "Oyster Shell Meadow Villa",
-    market: "Hamptons",
-    neighborhood: "Bridgehampton Meadowline",
-    beds: 6,
-    baths: 5,
-    sqft: 7450,
-    priceFromM: 11.4,
-    vibeTags: ["pool pavilion", "sunrise rituals", "view deck"],
-  },
-];
-
-function useMountSafeClient() {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    setReady(true);
-  }, []);
-  return ready;
-}
-
-function LightingGrade({ enabled }: { enabled: boolean }) {
-  // Safe client mounted time-based “sepia/brightness matrix”
-  const [grade, setGrade] = useState({ sepia: 0.12, brightness: 1.0 });
-
-  useEffect(() => {
-    if (!enabled) return;
-    const update = () => {
-      const h = new Date().getHours() + new Date().getMinutes() / 60;
-      const t = h / 24;
-      const sepia = 0.06 + 0.28 * Math.sin(Math.PI * (t - 0.22));
-      const brightness = 0.88 + 0.22 * Math.cos(Math.PI * (t - 0.12));
-      setGrade({ sepia, brightness });
-    };
-    update();
-    const id = window.setInterval(update, 60_000);
-    return () => window.clearInterval(id);
-  }, [enabled]);
-
+function LuminousNavbar({
+  brand,
+  menu,
+  cta,
+}: {
+  brand: string;
+  menu: string[];
+  cta: { label: string; href: string };
+}) {
   return (
-    <div
-      aria-hidden
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          "radial-gradient(circle at 15% 10%, rgba(147,51,234,0.14), transparent 45%), radial-gradient(circle at 70% 30%, rgba(34,197,94,0.10), transparent 55%), radial-gradient(circle at 70% 85%, rgba(34,211,238,0.08), transparent 50%)",
-        filter: `sepia(${grade.sepia.toFixed(3)}) brightness(${grade.brightness.toFixed(3)})`,
-        transition: "filter 450ms ease",
-      }}
-    />
+    <header className="fixed left-0 top-0 z-50 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+        <div className="text-[12px] font-mono uppercase tracking-[0.38em] text-white/90">
+          {brand}
+        </div>
+
+        <nav className="flex items-center gap-7">
+          {menu.map((m) => (
+            <Link
+              key={m}
+              href="#"
+              className="text-[12px] font-mono uppercase tracking-[0.28em] text-white/70 hover:text-white transition"
+              aria-label={m}
+            >
+              {m}
+            </Link>
+          ))}
+
+          <Link
+            href={cta.href}
+            className="inline-flex min-h-[40px] items-center justify-center rounded-full bg-white px-5 py-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-black hover:opacity-95 transition"
+          >
+            {cta.label}
+          </Link>
+        </nav>
+      </div>
+    </header>
   );
 }
 
-function HeroSearchLink() {
+function SandLines() {
   return (
-    <Link
-      href="/portfolio/web-dev-projects/real-estate/collection"
-      className="sand-line group inline-flex items-center gap-2 rounded-full border border-[#D1D1C7]/40 bg-zinc-950/40 px-5 py-3 text-sm font-semibold text-[#FDFBF7] hover:bg-zinc-950/55 transition"
-    >
-      Explore the Ledger
-      <ArrowRight className="transition-transform group-hover:translate-x-0.5" size={16} />
-    </Link>
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div className="absolute left-0 top-0 h-full w-[1px] bg-white/5" />
+      <div className="absolute right-0 top-0 h-full w-[1px] bg-white/5" />
+      <div className="absolute left-0 top-0 h-[1px] w-full bg-white/5" />
+      <div className="absolute bottom-0 left-0 h-[1px] w-full bg-white/5" />
+
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(209,209,199,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(209,209,199,0.10) 1px, transparent 1px)",
+          backgroundSize: "48px 48px, 48px 48px",
+          maskImage: "radial-gradient(circle at 30% 20%, black 0%, transparent 60%)",
+        }}
+      />
+    </div>
   );
 }
 
-function CollectionQuickPanel() {
-  // tie to collection node using useSearchParams safely encapsulated in Suspense
-  const searchParams = useSearchParams();
-  const market = searchParams.get("market") ?? "All";
-  const q = searchParams.get("q") ?? "";
-  const minPrice = searchParams.get("minPrice") ?? "0";
+function HeroBackdrop({ variant }: { variant: "estate" | "plumbing" | "camp" }) {
+  if (variant === "estate") {
+    return (
+      <>
+        <div className="absolute inset-0">
+          <div className="h-full w-full bg-gradient-to-b from-[#0b1220] via-[#05070a] to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(147,51,234,0.22),transparent_45%),radial-gradient(circle_at_70%_25%,rgba(34,211,238,0.16),transparent_50%),radial-gradient(circle_at_50%_85%,rgba(227,173,43,0.14),transparent_55%)]" />
+          <div
+            className="absolute inset-0 opacity-70"
+            style={{
+              backgroundImage:
+                "linear-gradient(transparent 0 45%, rgba(0,0,0,0.65) 68%, rgba(0,0,0,0.95) 100%), repeating-linear-gradient(90deg, rgba(209,209,199,0.06) 0, rgba(209,209,199,0.06) 1px, transparent 1px, transparent 16px)"
+            }}
+          />
 
+          {/* Concrete/glass pavilion silhouette */}
+          <div className="absolute bottom-0 left-1/2 h-[62%] w-[92%] -translate-x-1/2">
+            <div className="absolute bottom-0 left-1/2 h-full w-[70%] -translate-x-1/2 rounded-[28px] bg-gradient-to-b from-white/8 to-black/70" />
+            <div className="absolute bottom-10 left-[14%] h-[38%] w-[26%] rounded-[20px] bg-gradient-to-b from-white/10 to-black/60" />
+            <div className="absolute bottom-14 right-[12%] h-[34%] w-[24%] rounded-[20px] bg-gradient-to-b from-white/10 to-black/65" />
+            <div className="absolute bottom-0 left-[18%] h-2 w-[64%] rounded-full bg-white/10 blur-[2px]" />
+
+            {/* Fire pit glow at bottom center */}
+            <div className="absolute bottom-2 left-1/2 h-[170px] w-[170px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0%,rgba(255,163,77,0.10)_25%,rgba(255,94,58,0.00)_65%)] blur-xl" />
+            <div className="absolute bottom-6 left-1/2 h-[80px] w-[80px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.30)_0%,rgba(255,188,80,0.16)_28%,rgba(255,94,58,0.00)_70%)] blur-lg" />
+          </div>
+        </div>
+
+        <div
+          aria-hidden
+          className="absolute inset-0 mix-blend-overlay opacity-60"
+          style={{
+            background:
+              "url(/file.svg) repeat" /* grain fallback */,
+            filter: "contrast(120%) brightness(100%)",
+          }}
+        />
+      </>
+    );
+  }
+
+  if (variant === "plumbing") {
+    return (
+      <>
+        <div className="absolute inset-0">
+          <div className="h-full w-full bg-gradient-to-b from-[#05070b] via-[#000000] to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(103,232,249,0.22),transparent_48%),radial-gradient(circle_at_75%_30%,rgba(6,182,212,0.18),transparent_52%),radial-gradient(circle_at_50%_80%,rgba(147,51,234,0.12),transparent_60%)]" />
+
+          {/* Mechanical layout grid */}
+          <div
+            className="absolute inset-0 opacity-90"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 26px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 26px)"
+            }}
+          />
+
+          {/* Terminal telemetry glow filter */}
+          <div className="absolute inset-0">
+            <div className="absolute left-1/2 top-[20%] h-[360px] w-[520px] -translate-x-1/2 rounded-[32px] bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.30)_0%,rgba(34,211,238,0.12)_30%,rgba(34,211,238,0.00)_70%)] blur-2xl" />
+            <div className="absolute left-1/2 top-[35%] h-[240px] w-[360px] -translate-x-1/2 rounded-[28px] bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.20)_0%,rgba(6,182,212,0.08)_35%,rgba(6,182,212,0.00)_70%)] blur-xl" />
+          </div>
+
+          {/* Mechanical pipes strokes */}
+          <div aria-hidden className="absolute inset-0">
+            <div className="absolute left-[10%] top-[28%] h-[2px] w-[78%] bg-white/10" />
+            <div className="absolute left-[12%] top-[36%] h-[2px] w-[52%] bg-white/8" />
+            <div className="absolute left-[28%] top-[18%] h-[40%] w-[2px] bg-white/7" />
+            <div className="absolute right-[18%] top-[22%] h-[52%] w-[2px] bg-white/6" />
+            <div className="absolute bottom-[18%] left-[22%] h-[120px] w-[520px] rounded-[100px] border border-[#22d3ee]/20" />
+          </div>
+        </div>
+
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-60"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(34,211,238,0.00), rgba(34,211,238,0.10), rgba(34,211,238,0.00))",
+            transform: "skewX(-14deg)",
+          }}
+        />
+      </>
+    );
+  }
+
+  // camp
   return (
-    <div className="rounded-[2rem] border border-[#D1D1C7]/40 bg-zinc-950/40 p-6 sm:p-8">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-2xl border border-[#D1D1C7]/40 bg-[#FDFBF7]/5 grid place-items-center">
-          <Sparkles size={18} className="text-[#D1D1C7]" />
-        </div>
-        <div>
-          <div className="text-xs font-mono uppercase tracking-[0.35em] text-[#D1D1C7]/70">
-            Current filter node
+    <>
+      <div className="absolute inset-0">
+        <div className="h-full w-full bg-gradient-to-b from-[#060b0c] via-[#030405] to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.20),transparent_48%),radial-gradient(circle_at_70%_25%,rgba(16,185,129,0.16),transparent_52%),radial-gradient(circle_at_50%_88%,rgba(245,158,11,0.18),transparent_60%)]" />
+
+        {/* forest silhouettes */}
+        <div aria-hidden className="absolute bottom-0 left-0 right-0 h-[52%]">
+          <div className="absolute bottom-0 left-0 h-full w-[55%] bg-[linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,0.95))]" />
+          <div className="absolute bottom-0 left-0 h-[70%] w-full opacity-90">
+            <div className="absolute bottom-0 left-[10%] h-[70%] w-[80px] rounded-full bg-white/6 blur-[0.3px]" />
+            <div className="absolute bottom-0 left-[22%] h-[85%] w-[70px] rounded-full bg-white/5" />
+            <div className="absolute bottom-0 left-[37%] h-[78%] w-[90px] rounded-full bg-white/4" />
+            <div className="absolute bottom-0 left-[58%] h-[88%] w-[80px] rounded-full bg-white/5" />
+            <div className="absolute bottom-0 left-[72%] h-[74%] w-[95px] rounded-full bg-white/4" />
           </div>
-          <div className="font-playfair text-2xl text-[#FDFBF7]">
-            Collection routing preview
-          </div>
         </div>
+
+        {/* warm organic corridor */}
+        <div className="absolute bottom-0 left-1/2 h-[520px] w-[760px] -translate-x-1/2 rounded-[340px] bg-[radial-gradient(circle_at_50%_60%,rgba(245,158,11,0.20)_0%,rgba(245,158,11,0.08)_35%,rgba(245,158,11,0.00)_70%)] blur-2xl" />
+        <div className="absolute bottom-[-30px] left-1/2 h-[240px] w-[360px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_50%_60%,rgba(251,191,36,0.18)_0%,rgba(251,191,36,0.07)_35%,rgba(251,191,36,0.00)_70%)] blur-xl" />
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[1.5rem] border border-[#D1D1C7]/40 bg-black/25 p-4">
-          <div className="text-xs font-mono uppercase tracking-[0.28em] text-[#D1D1C7]/70">
-            Market
-          </div>
-          <div className="mt-2 font-inter text-sm text-[#FDFBF7]">
-            {market}
-          </div>
-        </div>
-        <div className="rounded-[1.5rem] border border-[#D1D1C7]/40 bg-black/25 p-4">
-          <div className="text-xs font-mono uppercase tracking-[0.28em] text-[#D1D1C7]/70">
-            Keyword
-          </div>
-          <div className="mt-2 font-inter text-sm text-[#FDFBF7]">
-            {q ? q : "—"}
-          </div>
-        </div>
-        <div className="rounded-[1.5rem] border border-[#D1D1C7]/40 bg-black/25 p-4">
-          <div className="text-xs font-mono uppercase tracking-[0.28em] text-[#D1D1C7]/70">
-            Min price (M)
-          </div>
-          <div className="mt-2 font-inter text-sm text-[#FDFBF7]">
-            {minPrice}
-          </div>
-        </div>
-      </div>
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-60 mix-blend-overlay"
+        style={{
+          background:
+            "url(/file.svg) repeat",
+          filter: "contrast(120%)",
+        }}
+      />
+    </>
+  );
+}
 
-      <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2 text-[#FDFBF7]/75 text-sm">
-          <Clock size={16} className="text-[#D1D1C7]" />
-          Time-grade shifts automatically per local hour.
+function HeroContent({
+  eyebrow,
+  heading,
+  body,
+  primary,
+  secondary,
+}: {
+  eyebrow: string;
+  heading: string;
+  body: string;
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+}) {
+  return (
+    <div className="relative mx-auto w-full max-w-7xl px-4 pt-[84px] sm:px-6">
+      <div className="grid min-h-screen place-items-center pb-14">
+        <div className="w-full">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2">
+              <span className="text-[10px] font-mono uppercase tracking-[0.38em] text-white/65">
+                {eyebrow}
+              </span>
+            </div>
+
+            <h1 className="mt-5 font-playfair text-6xl leading-[0.98] text-[#FDFBF7]">
+              {heading}
+            </h1>
+
+            <p className="mt-5 max-w-xl font-inter text-sm leading-7 text-[#FDFBF7]/75">
+              {body}
+            </p>
+
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Link
+                href={primary.href}
+                className="group inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-black hover:opacity-95 transition"
+              >
+                {primary.label}
+                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-0.5" size={16} />
+              </Link>
+              <Link
+                href={secondary.href}
+                className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-[#FDFBF7] hover:bg-white/10 transition"
+              >
+                {secondary.label}
+              </Link>
+            </div>
+          </div>
         </div>
-        <HeroSearchLink />
       </div>
     </div>
   );
 }
 
-export default function RealEstateHomePage() {
-  const clientReady = useMountSafeClient();
-
-  const { scrollYProgress } = useScroll();
-  const heroCompression = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
-  const heroGlow = useTransform(scrollYProgress, [0, 0.65], [0.38, 0.15]);
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, -12]);
-
+export default function RealEstateLanding() {
   return (
-    <div className="relative">
-      <section className="relative overflow-hidden border-b border-[#D1D1C7]/40">
-        <LightingGrade enabled={clientReady} />
+    <div className="min-h-screen relative bg-black text-white">
+      <LuminousNavbar
+        brand="LUMINOUS PEDIGREE"
+        menu={["COLLECTION", "ABOUT", "INQUIRE"]}
+        cta={{ label: "INQUIRE", href: "/portfolio/web-dev-projects/real-estate/about" }}
+      />
 
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-[-240px] top-[-140px] h-[520px] w-[520px] rounded-full bg-zinc-950/50 blur-3xl" />
-          <div className="absolute right-[-220px] bottom-[-180px] h-[620px] w-[620px] rounded-full bg-zinc-950/45 blur-3xl" />
-        </div>
-
-        <motion.div
-          style={{ opacity: heroGlow, y: heroY, scale: heroCompression }}
-          className="mx-auto w-full max-w-7xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-12"
-        >
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-3 rounded-full border border-[#D1D1C7]/40 bg-[#FDFBF7]/5 px-4 py-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.35em] text-[#D1D1C7]/70">
-                  Boutique Brokerage Template
-                </span>
-              </div>
-
-              <h1 className="mt-5 font-playfair text-5xl leading-[0.98] text-[#FDFBF7]">
-                Luminous Pedigree
-                <span className="block text-[#FDFBF7]/70">Curated real estate discovery</span>
-              </h1>
-
-              <p className="mt-5 font-inter text-sm leading-7 text-[#FDFBF7]/75">
-                Hamptons & NYC editorial template featuring a ledger-style property
-                intake, a mocked MLS-like filter grid, and dynamic time-based
-                lighting grade for a premium conversion feel.
-              </p>
-
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                {[
-                  "Live-Feel Discovery UI (Mocked)",
-                  "Ledger-Driven Inquiry",
-                  "Aperture Reveal Media Motion",
-                ].map((t) => (
-                  <span
-                    key={t}
-                    className="sand-line rounded-full border border-[#D1D1C7]/40 bg-zinc-950/40 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.28em] text-[#FDFBF7]/75"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Link
-                  href="/portfolio/web-dev-projects/real-estate/collection"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center rounded-full bg-[#FDFBF7] px-5 py-3 text-sm font-semibold text-black hover:opacity-95 transition"
-                >
-                  Launch Collection Node
-                </Link>
-                <Link
-                  href="/portfolio/web-dev-projects/real-estate/property/luminous-dune-01"
-                  className="sand-line inline-flex items-center justify-center rounded-full border border-[#D1D1C7]/40 bg-zinc-950/40 px-5 py-3 text-sm font-semibold text-[#FDFBF7] hover:bg-zinc-950/55 transition"
-                >
-                  Open Detail Ledger
-                </Link>
-              </div>
-            </div>
-
-            <div className="w-full max-w-lg">
-              <div className="rounded-[2rem] border border-[#D1D1C7]/40 bg-zinc-950/40 p-6 sm:p-8">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-xs font-mono uppercase tracking-[0.35em] text-[#D1D1C7]/70">
-                      Featured lineup
-                    </div>
-                    <div className="mt-2 font-playfair text-3xl text-[#FDFBF7]">
-                      Editorial picks
-                    </div>
-                  </div>
-                  <div className="h-12 w-12 rounded-2xl border border-[#D1D1C7]/40 bg-black/30 grid place-items-center">
-                    <Building2 size={20} className="text-[#D1D1C7]" />
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {MOCK_HERO.map((x) => (
-                    <Link
-                      key={x.id}
-                      href={`/portfolio/web-dev-projects/real-estate/property/${x.id}`}
-                      className="block rounded-[1.75rem] border border-[#D1D1C7]/40 bg-black/20 p-4 transition hover:bg-black/30"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-sm font-semibold text-[#FDFBF7]">
-                            {x.name}
-                          </div>
-                          <div className="mt-1 text-xs font-inter text-[#FDFBF7]/70">
-                            {x.market} · {x.neighborhood}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs font-mono uppercase tracking-[0.25em] text-[#D1D1C7]/70">
-                            From
-                          </div>
-                          <div className="mt-1 font-inter text-sm font-semibold text-[#FDFBF7]">
-                            ${x.priceFromM.toFixed(2)}M
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {x.vibeTags.slice(0, 3).map((t) => (
-                          <span
-                            key={t}
-                            className="sand-line rounded-full border border-[#D1D1C7]/40 bg-zinc-950/40 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.28em] text-[#FDFBF7]/70"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-        <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
-          <div className="lg:col-span-3">
-            <Suspense fallback={<div className="h-24" />}>
-              <CollectionQuickPanel />
-            </Suspense>
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="rounded-[2rem] border border-[#D1D1C7]/40 bg-zinc-950/40 p-6 sm:p-8">
-              <div className="text-xs font-mono uppercase tracking-[0.35em] text-[#D1D1C7]/70">
-                Conversion edges
-              </div>
-              <h2 className="mt-3 font-playfair text-3xl text-[#FDFBF7]">
-                Built for the next click.
-              </h2>
-
-              <div className="mt-6 space-y-4">
-                {[
-                  {
-                    title: "Ranked ledger discovery",
-                    body: "Cards reinforce intent with calm structure and technical clarity. No spammy interactions.",
-                  },
-                  {
-                    title: "Aperture reveal media",
-                    body: "Clean clip-path aperture motion creates premium editorial energy without heavy assets.",
-                  },
-                  {
-                    title: "Inquiry sheet UX",
-                    body: "Detail pages render a safety + privacy note and generate a mock intake packet instantly.",
-                  },
-                ].map((b) => (
-                  <div
-                    key={b.title}
-                    className="rounded-[1.75rem] border border-[#D1D1C7]/40 bg-black/20 p-5"
-                  >
-                    <div className="font-inter text-sm font-semibold text-[#FDFBF7]">
-                      {b.title}
-                    </div>
-                    <p className="mt-2 font-inter text-sm leading-6 text-[#FDFBF7]/75">
-                      {b.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <AnimatePresence>
-                  <Link
-                    href="/portfolio/web-dev-projects/real-estate/collection"
-                    className="inline-flex w-full items-center justify-center rounded-full bg-[#FDFBF7] px-5 py-3 text-sm font-semibold text-black hover:opacity-95 transition"
-                  >
-                    Jump to MLS Filter Grid
-                  </Link>
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
+      <section className="min-h-screen relative pt-0">
+        <HeroBackdrop variant="estate" />
+        <SandLines />
+        <HeroContent
+          eyebrow="COASTAL PAVILION EDITORIAL"
+          heading="Montauk Overlook"
+          body="Perched on Montauk's dramatic bluffs, this concrete-and-glass pavilion offers 180-degree ocean views from every room. Raw, elemental architecture at land's end."
+          primary={{ label: "EXPLORE ESTATE", href: "/portfolio/web-dev-projects/real-estate/collection" }}
+          secondary={{ label: "INQUIRE NOW", href: "/portfolio/web-dev-projects/real-estate/about" }}
+        />
       </section>
     </div>
   );
