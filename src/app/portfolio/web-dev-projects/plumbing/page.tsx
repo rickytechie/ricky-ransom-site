@@ -14,7 +14,7 @@ function LuminousNavbar({
   cta: { label: string; href: string };
 }) {
   return (
-    <header className="fixed left-0 top-0 z-50 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
+    <header className="fixed left-0 top-0 z-50 w-full border-b border-white/5 bg-black/60 backdrop-blur-md supports-[backdrop-filter]:bg-black/50">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
         <div className="text-[12px] font-mono uppercase tracking-[0.38em] text-white/90">
           {brand}
@@ -51,52 +51,50 @@ function SandLines() {
       <div className="absolute right-0 top-0 h-full w-[1px] bg-white/5" />
       <div className="absolute left-0 top-0 h-[1px] w-full bg-white/5" />
       <div className="absolute bottom-0 left-0 h-[1px] w-full bg-white/5" />
+
       <div
         className="absolute inset-0"
         style={{
           backgroundImage:
             "linear-gradient(to right, rgba(209,209,199,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(209,209,199,0.10) 1px, transparent 1px)",
           backgroundSize: "48px 48px, 48px 48px",
-          maskImage: "radial-gradient(circle at 40% 20%, black 0%, transparent 60%)",
+          maskImage: "radial-gradient(circle at 25% 20%, black 0%, transparent 60%)",
         }}
       />
     </div>
   );
 }
 
-function HeroBackdrop() {
+function HeroBackdrop({ accent }: { accent: string }) {
   return (
     <div className="absolute inset-0">
-      <div className="h-full w-full bg-gradient-to-b from-[#06080e] via-[#000000] to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(103,232,249,0.24),transparent_48%),radial-gradient(circle_at_75%_30%,rgba(6,182,212,0.18),transparent_52%),radial-gradient(circle_at_50%_80%,rgba(147,51,234,0.12),transparent_60%)]" />
-
+      <div className="h-full w-full bg-gradient-to-b from-[#060b0c] via-[#030405] to-black" />
       <div
-        className="absolute inset-0 opacity-90"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.20),transparent_48%),radial-gradient(circle_at_70%_25%,rgba(16,185,129,0.16),transparent_52%),radial-gradient(circle_at_50%_88%,rgba(245,158,11,0.18),transparent_60%)]"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 26px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 26px)"
+          filter: "saturate(120%)",
         }}
       />
 
-      <div className="absolute inset-0">
-        <div className="absolute left-1/2 top-[20%] h-[360px] w-[520px] -translate-x-1/2 rounded-[32px] bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.30)_0%,rgba(34,211,238,0.12)_30%,rgba(34,211,238,0.00)_70%)] blur-2xl" />
-        <div className="absolute left-1/2 top-[35%] h-[240px] w-[360px] -translate-x-1/2 rounded-[28px] bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.20)_0%,rgba(6,182,212,0.08)_35%,rgba(6,182,212,0.00)_70%)] blur-xl" />
-      </div>
-
-      {/* Mechanical arcs */}
-      <div aria-hidden className="absolute inset-0">
-        <div className="absolute left-[12%] top-[34%] h-[2px] w-[76%] bg-white/10" />
-        <div className="absolute left-[18%] top-[42%] h-[2px] w-[50%] bg-white/8" />
-        <div className="absolute right-[18%] top-[22%] h-[58%] w-[2px] bg-white/6" />
-        <div className="absolute bottom-[18%] left-[18%] h-[120px] w-[560px] rounded-[100px] border border-[#22d3ee]/20" />
-      </div>
+      {/* accent glow */}
+      <div
+        className="absolute bottom-0 left-1/2 h-[520px] w-[760px] -translate-x-1/2 rounded-[340px] blur-2xl"
+        style={{
+          background: `radial-gradient(circle_at_50%_60%, ${accent}33 0%, ${accent}14 35%, ${accent}00 70%)`,
+        }}
+      />
+      <div
+        className="absolute bottom-[-30px] left-1/2 h-[240px] w-[360px] -translate-x-1/2 rounded-full blur-xl"
+        style={{
+          background: `radial-gradient(circle_at_50%_60%, ${accent}2e 0%, ${accent}12 35%, ${accent}00 70%)`,
+        }}
+      />
 
       <div
         aria-hidden
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0 opacity-60 mix-blend-overlay"
         style={{
-          background:
-            "url(/file.svg) repeat",
+          background: "url(/file.svg) repeat",
           filter: "contrast(120%)",
         }}
       />
@@ -104,12 +102,27 @@ function HeroBackdrop() {
   );
 }
 
+function GlowOverlayFilter({ accent }: { accent: string }) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute bottom-[-10px] left-1/2 h-[260px] w-[620px] -translate-x-1/2"
+      style={{
+        background: `radial-gradient(circle at 50% 50%, ${accent}33 0%, ${accent}14 38%, transparent 68%)`,
+        filter: "blur(24px) saturate(125%)",
+      }}
+    />
+  );
+}
+
 function HeroContent({
+  tag,
   heading,
   body,
   primary,
   secondary,
 }: {
+  tag: string;
   heading: string;
   body: string;
   primary: { label: string; href: string };
@@ -117,18 +130,22 @@ function HeroContent({
 }) {
   return (
     <div className="relative mx-auto w-full max-w-7xl px-4 pt-[84px] sm:px-6">
-      <div className="grid min-h-screen place-items-center pb-14">
+      <div className="grid min-h-screen place-items-end pb-14">
         <div className="w-full">
           <div className="max-w-2xl">
             <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2">
               <span className="text-[10px] font-mono uppercase tracking-[0.38em] text-white/65">
-                INDUSTRIAL TELEMETRY LAYOUT
+                {tag}
               </span>
             </div>
 
-            <h1 className="mt-5 font-playfair text-6xl leading-[0.98] text-[#FDFBF7]">{heading}</h1>
+            <h1 className="mt-5 font-playfair text-6xl leading-[0.98] text-[#FDFBF7] sm:text-7xl">
+              {heading}
+            </h1>
 
-            <p className="mt-5 max-w-xl font-inter text-sm leading-7 text-[#FDFBF7]/75">{body}</p>
+            <p className="mt-5 max-w-xl font-inter text-sm leading-7 text-[#FDFBF7]/75">
+              {body}
+            </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
               <Link
@@ -136,8 +153,12 @@ function HeroContent({
                 className="group inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-black hover:opacity-95 transition"
               >
                 {primary.label}
-                <ArrowRight className="ml-2 transition-transform group-hover:translate-x-0.5" size={16} />
+                <ArrowRight
+                  className="ml-2 transition-transform group-hover:translate-x-0.5"
+                  size={16}
+                />
               </Link>
+
               <Link
                 href={secondary.href}
                 className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-[#FDFBF7] hover:bg-white/10 transition"
@@ -152,7 +173,7 @@ function HeroContent({
   );
 }
 
-export default function PlumbingLanding() {
+export default function PlumbingPage() {
   return (
     <div className="min-h-screen relative bg-black text-white">
       <LuminousNavbar
@@ -161,12 +182,26 @@ export default function PlumbingLanding() {
         cta={{ label: "DISPATCH", href: "/portfolio/web-dev-projects/plumbing/copilot" }}
       />
 
-      <section className="min-h-screen relative">
-        <HeroBackdrop />
+      <section className="relative min-h-screen">
+        <HeroBackdrop accent="#06b6d4" />
         <SandLines />
+        <GlowOverlayFilter accent="#06b6d4" />
+
+        {/* bottom-left typography stack */}
+        <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-44 w-full bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+        <div className="absolute bottom-0 left-0 z-20 px-4 pb-12 sm:px-6">
+          <div className="max-w-2xl">
+            <div className="font-mono uppercase tracking-[0.46em] text-[10px] text-white/60">
+              INFRASTRUCTURE CORE
+            </div>
+          </div>
+        </div>
+
         <HeroContent
+          tag="INFRASTRUCTURE CORE"
           heading="Precision Telemetry"
-          body="Engineered commercial pipe networks monitored in real-time. Automated diagnostic isolation arrays paired with zero-latency priority contractor dispatch."
+          body="Engineered commercial pipe networks monitored in real-time. Automated diagnostic isolation arrays paired with zero-latency priority contractor dispatch infrastructure."
           primary={{ label: "ACCESS TERMINAL", href: "/portfolio/web-dev-projects/plumbing/copilot" }}
           secondary={{ label: "RUN CO-PILOT", href: "/portfolio/web-dev-projects/plumbing/copilot" }}
         />

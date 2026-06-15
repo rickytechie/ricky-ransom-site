@@ -170,28 +170,28 @@ function HeroContent({
   );
 }
 
-export default function SummerCampPage() {
+export default function PersonalTrainerPage() {
   return (
     <div className="min-h-screen relative bg-black text-white">
       <LuminousNavbar
-        brand="CAMP EVERWOOD"
-        menu={["PROGRAMS", "PLACEMENT", "ENROLL"]}
-        cta={{ label: "ENROLL", href: "/portfolio/web-dev-projects/summer-camp/assistant" }}
+        brand="VIBEVAULT FITNESS"
+        menu={["PROGRAMS", "METRICS", "BOOK SESSION"]}
+        cta={{ label: "BOOK SESSION", href: "/portfolio/web-dev-projects/personal-trainer/programs" }}
       />
 
       <section className="relative min-h-screen">
-        <HeroBackdrop accent="#22c55e" />
+        <HeroBackdrop accent="#f43f5e" />
         <SandLines />
-        <GlowOverlayFilter accent="#22c55e" />
+        <GlowOverlayFilter accent="#f43f5e" />
 
         <div className="pointer-events-none absolute bottom-0 left-0 z-10 h-44 w-full bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
         <HeroContent
-          tag="ORGANIC ADVENTURE PORTAL"
-          heading="Camp Everwood"
-          body="An immersive, premium brand experience integrating rich natural landscapes with adaptive educational pathways and streamlined placement pipelines."
-          primary={{ label: "EXPLORE PROGRAMS", href: "/portfolio/web-dev-projects/summer-camp/programs" }}
-          secondary={{ label: "TALK TO ASSISTANT", href: "/portfolio/web-dev-projects/summer-camp/assistant" }}
+          tag="HIGH-OCTANE ATHLETIC COACHING"
+          heading="VibeVault Fitness"
+          body="Ultra-modern, performance-driven conditioning engineered for serious results. Aggressive tracking metrics paired with bespoke execution pipelines designed to maximize athletic outputs."
+          primary={{ label: "START TRAINING", href: "/portfolio/web-dev-projects/personal-trainer/programs" }}
+          secondary={{ label: "VIEW SCHEDULE", href: "/portfolio/web-dev-projects/personal-trainer/metrics" }}
         />
       </section>
     </div>
