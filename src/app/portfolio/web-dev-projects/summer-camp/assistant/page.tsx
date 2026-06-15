@@ -121,7 +121,7 @@ function TerminalLikeTranscript({
               {m.content}
             </pre>
           </motion.div>
-        )))}
+        ))}
       </div>
     </div>
   );
@@ -139,10 +139,12 @@ export default function CampPlacementAssistantPage() {
   const [input, setInput] = useState("");
   const [mounted, setMounted] = useState(false);
   const [thinking, setThinking] = useState(false);
-  const [transcript, setTranscript] = useState(() => [
+  const [transcript, setTranscript] = useState<
+    { id: string; role: "assistant" | "parent"; content: string }[]
+  >(() => [
     {
       id: "seed",
-      role: "assistant" as const,
+      role: "assistant",
       content:
         "AI Camp Placement Assistant online. Provide age, outdoor preferences, interests, and schedule blocks. I will recommend specialized registration tracks in real-time (mock logic).",
     },

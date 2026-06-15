@@ -282,14 +282,15 @@ function LightGrade({ enabled }: { enabled: boolean }) {
 function CollectionBody() {
   const searchParams = useSearchParams();
 
-  const initial = useMemo(() => {
+  const initialFilterValues = useMemo(() => {
     const market = searchParams.get("market") ?? "All";
     const q = searchParams.get("q") ?? "";
     const minPrice = searchParams.get("minPrice") ?? "0";
     return { market, q, minPrice };
   }, [searchParams]);
 
-  const [filters, setFilters] = useState(initial);
+  const [filters, setFilters] = useState(initialFilterValues);
+
 
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -10]);
@@ -301,8 +302,6 @@ function CollectionBody() {
   }, []);
 
   const gradedStyles = useMemo(() => {
-    // local time-based sepia/brightness matrix shift
-    // mount-safe via clientReady
     if (!clientReady) return { filter: "none" };
     const h = new Date().getHours();
     const t = h / 24;
@@ -324,13 +323,11 @@ function CollectionBody() {
       if (q) {
         const hay = `${e.name} ${e.neighborhood} ${e.market} ${e.vibeTags.join(" ")} ${e.highlights.join(" ")}`.toLowerCase();
         if (hay.includes(q)) score += 18;
-        // lightweight token bump
-        q.split(/\s+/).filter(Boolean).forEach((tok) => {
+        q.split(/\\s+/).filter(Boolean).forEach((tok) => {
           if (hay.includes(tok)) score += 4;
         });
       }
       if (Number(e.priceFromM) >= minPrice) score += 12;
-      // premium bias
       score += (e.beds >= 5 ? 2 : 0) + (e.sqft >= 5000 ? 2 : 0);
       return { e, score };
     })
@@ -348,6 +345,9 @@ function CollectionBody() {
 
     return scored.map((x) => x.e);
   }, [filters]);
+
+
+
 
   return (
     <div className="relative">
@@ -379,9 +379,9 @@ function CollectionBody() {
         </motion.div>
 
         <div className="mt-6" style={gradedStyles}>
-          <Suspense fallback={<div className="h-24" />}> 
+          <Suspense fallback={<div className="h-24" />}>
             <SearchControls
-              initial={initial}
+              initial={initialFilterValues}
               estates={MOCK_ESTATES}
               onChange={(next) => setFilters(next)}
             />

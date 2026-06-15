@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Bath, Bed, Building2, MapPin, Ruler, ShieldCheck, Sparkles } from "lucide-react";
 
@@ -197,13 +197,12 @@ function ApertureReveal({ aperture }: { aperture: number }) {
   );
 }
 
-export default function PropertyDetailPage() {
-  const params = useParams<{ id: string }>();
+export default function PropertyDetail({ params }: { params: { id: string } }) {
   const estate = useMemo(() => {
-    const id = params?.id;
-    if (!id) return null;
+    const id = params.id;
     return MOCK_ESTATES.find((e) => e.id === id) ?? null;
-  }, [params]);
+  }, [params.id]);
+
 
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [notes, setNotes] = useState("");
@@ -213,9 +212,10 @@ export default function PropertyDetailPage() {
   useEffect(() => {
     // open a delightful default on first mount if query matches
     if (estate) setNotes(`Interested in a private showing of ${estate.name}.`);
-  }, [estate]);
+}, [estate]);
 
   if (!estate) {
+
     return (
       <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
         <div className="rounded-[2rem] border border-[#D1D1C7]/40 bg-zinc-950/40 p-6 sm:p-10">
